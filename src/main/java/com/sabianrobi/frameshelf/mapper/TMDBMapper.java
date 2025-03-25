@@ -1,8 +1,11 @@
 package com.sabianrobi.frameshelf.mapper;
 
 import com.sabianrobi.frameshelf.entity.*;
+import com.sabianrobi.frameshelf.entity.response.SearchActorResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
+import info.movito.themoviedbapi.model.core.popularperson.PopularPerson;
 import info.movito.themoviedbapi.model.movies.MovieDb;
+import info.movito.themoviedbapi.model.people.PersonDb;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -52,6 +55,33 @@ public class TMDBMapper {
                 .release_date(tmdbMovie.getReleaseDate())
                 .original_title(tmdbMovie.getOriginalTitle())
                 .poster_path(tmdbMovie.getPosterPath())
+                .build();
+    }
+
+    public Actor mapTMDBActorToActor(final PersonDb tmdbPerson) {
+        return Actor.builder()
+                .adult(tmdbPerson.getAdult())
+                .biography(tmdbPerson.getBiography())
+                .birthday(tmdbPerson.getBirthday())
+                .deathday(tmdbPerson.getDeathDay())
+                .gender(tmdbPerson.getGender().toValue())
+                .homepage(tmdbPerson.getHomepage())
+                .id(tmdbPerson.getId())
+                .imdb_id(tmdbPerson.getImdbId())
+                .known_for_department(tmdbPerson.getKnownForDepartment())
+                .name(tmdbPerson.getName())
+                .place_of_birth(tmdbPerson.getPlaceOfBirth())
+                .popularity(tmdbPerson.getPopularity())
+                .profile_path(tmdbPerson.getProfilePath())
+                .build();
+    }
+
+
+    public SearchActorResponse mapTMDBPopularPersonToSearchActorResponse(final PopularPerson tmdbPerson) {
+        return SearchActorResponse.builder()
+                .id(tmdbPerson.getId())
+                .name(tmdbPerson.getName())
+                .profile_path(tmdbPerson.getProfilePath())
                 .build();
     }
 }

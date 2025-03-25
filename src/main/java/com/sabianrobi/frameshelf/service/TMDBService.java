@@ -1,13 +1,17 @@
 package com.sabianrobi.frameshelf.service;
 
 import com.sabianrobi.frameshelf.entity.*;
+import com.sabianrobi.frameshelf.entity.response.SearchActorResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import com.sabianrobi.frameshelf.mapper.TMDBMapper;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbMovies;
+import info.movito.themoviedbapi.TmdbPeople;
 import info.movito.themoviedbapi.TmdbSearch;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
+import info.movito.themoviedbapi.model.core.popularperson.PopularPersonResultsPage;
 import info.movito.themoviedbapi.model.movies.MovieDb;
+import info.movito.themoviedbapi.model.people.PersonDb;
 import info.movito.themoviedbapi.tools.TmdbException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,6 +27,7 @@ import java.util.Set;
 @Service
 public class TMDBService {
     final private TmdbApi tmdbApi;
+    final private String language = "en-US";
 
     @Autowired
     private GenreService genreService;
@@ -47,15 +52,13 @@ public class TMDBService {
         tmdbApi = new TmdbApi(tmdbConfigs.get("read-key"));
     }
 
-    // Queries the TMDB API for details
-    public MovieDb getTMDBMovie(final int id) throws TmdbException {
-        final TmdbMovies tmdbMovies = tmdbApi.getMovies();
-
-        return tmdbMovies.getDetails(id, "en-US");
-    }
+    // ------------
+    //    Movies
+    // ------------
 
     public Movie createMovie(final int movieId) throws TmdbException {
-        final MovieDb tmdbMovie = getTMDBMovie(movieId);
+        final TmdbMovies tmdbMovies = tmdbApi.getMovies();
+        final MovieDb tmdbMovie = tmdbMovies.getDetails(movieId, language);
 
         // Create & get sub models
         final Set<Genre> genres = genreService.createGenres(tmdbMovie.getGenres());
@@ -75,5 +78,26 @@ public class TMDBService {
 
         final Pageable pageable = PageRequest.of(page - 1, 20);
         return new PageImpl<>(movieResults, pageable, searchResult.getTotalResults());
+    }
+
+    // ------------
+    //    Actors
+    // ------------
+
+    public Actor createActor(final int actorId) throws TmdbException {
+        final TmdbPeople tmdbPeople = tmdbApi.getPeople();
+        final PersonDb tmdbPerson = tmdbPeople.getDetails(actorId, language);
+
+        return tmdbMapper.mapTMDBActorToActor(tmdbPerson);
+    }
+
+    public Page<SearchActorResponse> searchActor(final String query, final int page) throws TmdbException {
+        final TmdbSearch tmdbSearch = tmdbApi.getSearch();
+        final PopularPersonResultsPage searchResult = tmdbSearch.searchPerson(query, true, "en-US", page);
+
+        final List<SearchActorResponse> actorResults = searchResult.getResults().stream().map(actor -> tmdbMapper.mapTMDBPopularPersonToSearchActorResponse(actor)).toList();
+
+        final Pageable pageable = PageRequest.of(page - 1, 20);
+        return new PageImpl<>(actorResults, pageable, searchResult.getTotalResults());
     }
 }

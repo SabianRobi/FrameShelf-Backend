@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class ProductionCompany {
     @Id
     int id;

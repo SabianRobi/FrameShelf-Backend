@@ -15,8 +15,8 @@ import java.util.Set;
 @Data
 @Entity
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Movie {
     @Id
     int id;

@@ -68,7 +68,7 @@ public class ActorService {
         return actors.map(actorMapper::mapActorToActorResponse);
     }
 
-    public ActorResponse getActor(final Integer id) {
+    public ActorResponse getActor(final int id) {
         final Actor actor = repository.findById(id).orElseThrow();
 
         return actorMapper.mapActorToActorResponse(actor);
@@ -88,11 +88,11 @@ public class ActorService {
         return actorMapper.mapActorToActorResponse(actor);
     }
 
-    public void deleteActor(final Integer id) {
+    public void deleteActor(final int id) {
         repository.deleteById(id);
     }
 
-    public Page<SearchActorResponse> search(final String query, final Integer page) {
+    public Page<SearchActorResponse> search(final String query, final int page) {
         // Search in the TMDB API
         try {
             return tmdbService.searchActor(query, page);

@@ -31,7 +31,7 @@ public class MovieController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MovieResponse> getMovie(final @PathVariable(value = "id") Integer id) {
+    public ResponseEntity<MovieResponse> getMovie(final @PathVariable("id") Integer id) {
         final MovieResponse movieResponse = movieService.getMovie(id);
 
         return ResponseEntity.ok(movieResponse);
@@ -45,7 +45,7 @@ public class MovieController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMovie(final @PathVariable(name = "id") Integer id) {
+    public ResponseEntity<Void> deleteMovie(final @PathVariable("id") Integer id) {
         movieService.deleteMovie(id);
 
         return ResponseEntity.noContent().build();

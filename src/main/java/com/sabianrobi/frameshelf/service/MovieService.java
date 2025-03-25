@@ -68,21 +68,10 @@ public class MovieService {
         return movies.map(movie -> movieMapper.mapMovieToMovieResponse(movie));
     }
 
-    public MovieResponse getMovie(final Integer id) {
+    public MovieResponse getMovie(final int id) {
         final Movie movie = repository.findById(id).orElseThrow();
 
         return movieMapper.mapMovieToMovieResponse(movie);
-    }
-
-    private List<SortDto> jsonStringToSortDto(final String jsonString) {
-        try {
-            ObjectMapper obj = new ObjectMapper();
-            return obj.readValue(jsonString, new TypeReference<>() {
-            });
-        } catch (final Exception e) {
-            System.out.println("Exception: " + e);
-            return null;
-        }
     }
 
     public MovieResponse createMovie(final CreateMovieRequest createMovieRequest) {
@@ -99,16 +88,29 @@ public class MovieService {
         return movieMapper.mapMovieToMovieResponse(movie);
     }
 
-    public void deleteMovie(final Integer id) {
+    public void deleteMovie(final int id) {
         repository.deleteById(id);
     }
 
-    public Page<SearchMovieResponse> search(final String query, final Integer page) {
+    public Page<SearchMovieResponse> search(final String query, final int page) {
         // Search in the TMDB API
         try {
             return tmdbService.searchMovie(query, page);
-        } catch (TmdbException e) {
+        } catch (final TmdbException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    // Utility methods
+
+    private List<SortDto> jsonStringToSortDto(final String jsonString) {
+        try {
+            ObjectMapper obj = new ObjectMapper();
+            return obj.readValue(jsonString, new TypeReference<>() {
+            });
+        } catch (final Exception e) {
+            System.out.println("Exception: " + e);
+            return null;
         }
     }
 }

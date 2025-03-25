@@ -9,5 +9,5 @@ import java.util.Set;
 
 @Repository
 public interface ProductionCountryRepository extends CrudRepository<ProductionCountry, String> {
-    Set<ProductionCountry> findAllByIso31661In(Collection<String> iso31661s);
+    Set<ProductionCountry> findAllByIso31661In(final Collection<String> iso31661s);
 }

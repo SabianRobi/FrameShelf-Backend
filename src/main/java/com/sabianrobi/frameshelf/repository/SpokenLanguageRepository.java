@@ -8,5 +8,5 @@ import java.util.Set;
 
 @Repository
 public interface SpokenLanguageRepository extends CrudRepository<SpokenLanguage, String> {
-    Set<SpokenLanguage> findAllByIso6391In(Set<String> iso6391s);
+    Set<SpokenLanguage> findAllByIso6391In(final Set<String> iso6391s);
 }

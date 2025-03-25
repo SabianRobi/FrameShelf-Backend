@@ -14,7 +14,7 @@ public class SecurityConfig {
 //    private GoogleCredentialService GoogleCredentialService;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(registry ->
                         registry

@@ -1,13 +1,22 @@
 package com.sabianrobi.frameshelf.service;
 
 import com.sabianrobi.frameshelf.entity.*;
+import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
+import com.sabianrobi.frameshelf.mapper.TMDBMapper;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbMovies;
+import info.movito.themoviedbapi.TmdbSearch;
+import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import info.movito.themoviedbapi.model.movies.MovieDb;
 import info.movito.themoviedbapi.tools.TmdbException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,11 +40,10 @@ public class TMDBService {
     private SpokenLanguageService spokenLanguageService;
 
     @Autowired
-    private Map<String, String> tmdbConfigs;
+    private TMDBMapper tmdbMapper;
 
     @Autowired
     public TMDBService(final Map<String, String> tmdbConfigs) {
-        System.out.println(tmdbConfigs + "\n" + tmdbConfigs.get("read-key"));
         tmdbApi = new TmdbApi(tmdbConfigs.get("read-key"));
     }
 
@@ -56,33 +64,16 @@ public class TMDBService {
         final Set<ProductionCountry> productionCountries = productionCountryService.createProductionCountries(tmdbMovie.getProductionCountries());
         final Set<SpokenLanguage> spokenLanguages = spokenLanguageService.createSpokenLanguages(tmdbMovie.getSpokenLanguages());
 
-        return Movie.builder()
-                .adult(tmdbMovie.getAdult())
-                .backdrop_path(tmdbMovie.getBackdropPath())
-                .belongs_to_collection(collection)
-                .budget(tmdbMovie.getBudget())
-                .genres(genres)
-                .homepage(tmdbMovie.getHomepage())
-                .id(tmdbMovie.getId())
-                .imdb_id(tmdbMovie.getImdbID())
-                .original_language(tmdbMovie.getOriginalLanguage())
-                .original_title(tmdbMovie.getOriginalTitle())
-                .overview(tmdbMovie.getOverview())
-                .popularity(tmdbMovie.getPopularity())
-                .poster_path(tmdbMovie.getPosterPath())
-                .production_companies(productionCompanies)
-                .production_countries(productionCountries)
-                .release_date(tmdbMovie.getReleaseDate())
-                .revenue(tmdbMovie.getRevenue())
-                .runtime(tmdbMovie.getRuntime())
-                .spoken_languages(spokenLanguages)
-                .status(tmdbMovie.getStatus())
-                .tagline(tmdbMovie.getTagline())
-                .title(tmdbMovie.getTitle())
-                .video(tmdbMovie.getVideo())
-                .vote_average(tmdbMovie.getVoteAverage())
-                .vote_count(tmdbMovie.getVoteCount())
-                .build();
+        return tmdbMapper.mapTMDBMovieDbToMovie(tmdbMovie, genres, collection, productionCompanies, productionCountries, spokenLanguages);
     }
 
+    public Page<SearchMovieResponse> searchMovie(final String query, final int page) throws TmdbException {
+        final TmdbSearch tmdbSearch = tmdbApi.getSearch();
+        final MovieResultsPage searchResult = tmdbSearch.searchMovie(query, true, "en-US", null, page, null, null);
+
+        final List<SearchMovieResponse> movieResults = searchResult.getResults().stream().map(movie -> tmdbMapper.mapTMDBMovieToSearchMovieResponse(movie)).toList();
+
+        final Pageable pageable = PageRequest.of(page - 1, 20);
+        return new PageImpl<>(movieResults, pageable, searchResult.getTotalResults());
+    }
 }

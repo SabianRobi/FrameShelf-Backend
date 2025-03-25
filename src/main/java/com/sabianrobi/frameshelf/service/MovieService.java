@@ -6,6 +6,7 @@ import com.sabianrobi.frameshelf.entity.Movie;
 import com.sabianrobi.frameshelf.entity.request.CreateMovieRequest;
 import com.sabianrobi.frameshelf.entity.request.GetMoviesRequest;
 import com.sabianrobi.frameshelf.entity.response.MovieResponse;
+import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import com.sabianrobi.frameshelf.entity.utility.MovieFilterDto;
 import com.sabianrobi.frameshelf.entity.utility.SortDto;
 import com.sabianrobi.frameshelf.mapper.MovieMapper;
@@ -97,8 +98,17 @@ public class MovieService {
 
         return movieMapper.mapMovieToMovieResponse(movie);
     }
-    
+
     public void deleteMovie(final Integer id) {
         repository.deleteById(id);
+    }
+
+    public Page<SearchMovieResponse> search(final String query, final Integer page) {
+        // Search in the TMDB API
+        try {
+            return tmdbService.searchMovie(query, page);
+        } catch (TmdbException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

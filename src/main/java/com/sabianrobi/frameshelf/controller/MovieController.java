@@ -3,6 +3,7 @@ package com.sabianrobi.frameshelf.controller;
 import com.sabianrobi.frameshelf.entity.request.CreateMovieRequest;
 import com.sabianrobi.frameshelf.entity.request.GetMoviesRequest;
 import com.sabianrobi.frameshelf.entity.response.MovieResponse;
+import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import com.sabianrobi.frameshelf.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -48,5 +49,13 @@ public class MovieController {
         movieService.deleteMovie(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<SearchMovieResponse>> search(
+            final @RequestParam(name = "query") String query,
+            final @RequestParam(name = "page", defaultValue = "1") Integer page) {
+
+        return ResponseEntity.ok(movieService.search(query, page));
     }
 }

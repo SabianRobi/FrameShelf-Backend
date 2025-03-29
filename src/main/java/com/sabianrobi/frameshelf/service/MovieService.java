@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sabianrobi.frameshelf.entity.Movie;
 import com.sabianrobi.frameshelf.entity.request.CreateMovieRequest;
 import com.sabianrobi.frameshelf.entity.request.GetMoviesRequest;
+import com.sabianrobi.frameshelf.entity.response.CastMemberResponse;
 import com.sabianrobi.frameshelf.entity.response.MovieResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import com.sabianrobi.frameshelf.entity.utility.MovieFilterDto;
@@ -72,6 +73,15 @@ public class MovieService {
         final Movie movie = repository.findById(id).orElseThrow();
 
         return movieMapper.mapMovieToMovieResponse(movie);
+    }
+
+    public List<CastMemberResponse> getMovieCredits(final int movieId) {
+        // Get cast members from the TMDB API
+        try {
+            return tmdbService.getMovieCredits(movieId);
+        } catch (final TmdbException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public MovieResponse createMovie(final CreateMovieRequest createMovieRequest) {

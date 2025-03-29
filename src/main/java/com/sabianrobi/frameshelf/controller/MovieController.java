@@ -2,6 +2,7 @@ package com.sabianrobi.frameshelf.controller;
 
 import com.sabianrobi.frameshelf.entity.request.CreateMovieRequest;
 import com.sabianrobi.frameshelf.entity.request.GetMoviesRequest;
+import com.sabianrobi.frameshelf.entity.response.CastMemberResponse;
 import com.sabianrobi.frameshelf.entity.response.MovieResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import com.sabianrobi.frameshelf.service.MovieService;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/movies")
@@ -35,6 +38,11 @@ public class MovieController {
         final MovieResponse movieResponse = movieService.getMovie(id);
 
         return ResponseEntity.ok(movieResponse);
+    }
+
+    @GetMapping("/{id}/cast")
+    public ResponseEntity<List<CastMemberResponse>> getMovieCast(final @PathVariable("id") Integer id) {
+        return ResponseEntity.ok(movieService.getMovieCredits(id));
     }
 
     @PostMapping

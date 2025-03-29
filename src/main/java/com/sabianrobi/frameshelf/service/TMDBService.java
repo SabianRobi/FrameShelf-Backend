@@ -1,6 +1,7 @@
 package com.sabianrobi.frameshelf.service;
 
 import com.sabianrobi.frameshelf.entity.*;
+import com.sabianrobi.frameshelf.entity.response.CastMemberResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchActorResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import com.sabianrobi.frameshelf.mapper.TMDBMapper;
@@ -10,6 +11,7 @@ import info.movito.themoviedbapi.TmdbPeople;
 import info.movito.themoviedbapi.TmdbSearch;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import info.movito.themoviedbapi.model.core.popularperson.PopularPersonResultsPage;
+import info.movito.themoviedbapi.model.movies.Credits;
 import info.movito.themoviedbapi.model.movies.MovieDb;
 import info.movito.themoviedbapi.model.people.PersonDb;
 import info.movito.themoviedbapi.tools.TmdbException;
@@ -72,12 +74,20 @@ public class TMDBService {
 
     public Page<SearchMovieResponse> searchMovie(final String query, final int page) throws TmdbException {
         final TmdbSearch tmdbSearch = tmdbApi.getSearch();
-        final MovieResultsPage searchResult = tmdbSearch.searchMovie(query, true, "en-US", null, page, null, null);
+        final MovieResultsPage searchResult = tmdbSearch.searchMovie(query, true, language, null, page, null, null);
 
         final List<SearchMovieResponse> movieResults = searchResult.getResults().stream().map(movie -> tmdbMapper.mapTMDBMovieToSearchMovieResponse(movie)).toList();
 
         final Pageable pageable = PageRequest.of(page - 1, 20);
         return new PageImpl<>(movieResults, pageable, searchResult.getTotalResults());
+    }
+
+    public List<CastMemberResponse> getMovieCredits(final Integer movieId) throws TmdbException {
+        final TmdbMovies tmdbSearch = tmdbApi.getMovies();
+
+        final Credits credits = tmdbSearch.getCredits(movieId, language);
+
+        return credits.getCast().stream().map(member -> tmdbMapper.mapTMDBCastToCastMemberResponse(member)).toList();
     }
 
     // ------------
@@ -93,7 +103,7 @@ public class TMDBService {
 
     public Page<SearchActorResponse> searchActor(final String query, final int page) throws TmdbException {
         final TmdbSearch tmdbSearch = tmdbApi.getSearch();
-        final PopularPersonResultsPage searchResult = tmdbSearch.searchPerson(query, true, "en-US", page);
+        final PopularPersonResultsPage searchResult = tmdbSearch.searchPerson(query, true, language, page);
 
         final List<SearchActorResponse> actorResults = searchResult.getResults().stream().map(actor -> tmdbMapper.mapTMDBPopularPersonToSearchActorResponse(actor)).toList();
 

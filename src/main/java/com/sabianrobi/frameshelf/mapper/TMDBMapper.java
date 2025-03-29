@@ -1,9 +1,11 @@
 package com.sabianrobi.frameshelf.mapper;
 
 import com.sabianrobi.frameshelf.entity.*;
+import com.sabianrobi.frameshelf.entity.response.CastMemberResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchActorResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import info.movito.themoviedbapi.model.core.popularperson.PopularPerson;
+import info.movito.themoviedbapi.model.movies.Cast;
 import info.movito.themoviedbapi.model.movies.MovieDb;
 import info.movito.themoviedbapi.model.people.PersonDb;
 import org.springframework.stereotype.Component;
@@ -82,6 +84,16 @@ public class TMDBMapper {
                 .id(tmdbPerson.getId())
                 .name(tmdbPerson.getName())
                 .profile_path(tmdbPerson.getProfilePath())
+                .build();
+    }
+
+    public CastMemberResponse mapTMDBCastToCastMemberResponse(final Cast cast) {
+        return CastMemberResponse.builder()
+                .id(cast.getId())
+                .name(cast.getName())
+                .originalName(cast.getOriginalName())
+                .profilePath(cast.getProfilePath())
+                .character(cast.getCharacter())
                 .build();
     }
 }

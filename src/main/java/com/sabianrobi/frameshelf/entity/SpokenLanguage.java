@@ -17,5 +17,5 @@ public class SpokenLanguage {
     String iso6391;
 
     String name;
-    String english_name;
+    String englishName;
 }

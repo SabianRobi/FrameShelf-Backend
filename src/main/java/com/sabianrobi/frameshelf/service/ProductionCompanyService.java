@@ -29,9 +29,9 @@ public class ProductionCompanyService {
             if (!repository.existsById(productionCompany.getId())) {
                 final ProductionCompany newProductionCompany = ProductionCompany.builder()
                         .id(productionCompany.getId())
-                        .logo_path(productionCompany.getLogoPath())
+                        .logoPath(productionCompany.getLogoPath())
                         .name(productionCompany.getName())
-                        .origin_country(productionCompany.getOriginCountry())
+                        .originCountry(productionCompany.getOriginCountry())
                         .build();
 
                 newProductionCompanies.add(newProductionCompany);

@@ -19,8 +19,8 @@ public class CollectionService {
         final Collection collection = Collection.builder()
                 .id(tmdbCollection.getId())
                 .name(tmdbCollection.getName())
-                .poster_path(tmdbCollection.getPosterPath())
-                .backdrop_path(tmdbCollection.getBackdropPath())
+                .posterPath(tmdbCollection.getPosterPath())
+                .backdropPath(tmdbCollection.getBackdropPath())
                 .build();
 
         return repository.save(collection);

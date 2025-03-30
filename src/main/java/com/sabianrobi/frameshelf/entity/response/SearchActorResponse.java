@@ -8,5 +8,5 @@ import lombok.Data;
 public class SearchActorResponse {
     private int id;
     private String name;
-    private String profile_path;
+    private String profilePath;
 }

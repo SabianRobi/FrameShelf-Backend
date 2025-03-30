@@ -9,5 +9,5 @@ public class ActorResponse {
     private int id;
     private String name;
     private String birthday;
-    private String profile_path;
+    private String profilePath;
 }

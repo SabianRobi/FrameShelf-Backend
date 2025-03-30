@@ -8,7 +8,7 @@ import lombok.Data;
 public class SearchMovieResponse {
     int id;
     String title;
-    String release_date;
-    String original_title;
-    String poster_path;
+    String releaseDate;
+    String originalTitle;
+    String posterPath;
 }

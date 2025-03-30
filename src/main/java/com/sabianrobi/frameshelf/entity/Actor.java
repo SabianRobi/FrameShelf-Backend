@@ -20,7 +20,7 @@ public class Actor {
 
     private String name;
     private String birthday;
-    private String profile_path;
+    private String profilePath;
 
 
     // Less important fields
@@ -28,12 +28,12 @@ public class Actor {
     private String biography;
 
     private boolean adult;
-    //    private List<String> also_known_as;
+    //    private List<String> alsoKnownAs;
     private String deathday;
     private int gender;
     private String homepage;
-    private String imdb_id;
-    private String known_for_department;
-    private String place_of_birth;
+    private String imdbId;
+    private String knownForDepartment;
+    private String placeOfBirth;
     private double popularity;
 }

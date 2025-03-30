@@ -12,7 +12,7 @@ public class ActorMapper {
                 .id(actor.getId())
                 .name(actor.getName())
                 .birthday(actor.getBirthday())
-                .profile_path(actor.getProfile_path())
+                .profilePath(actor.getProfilePath())
                 .build();
     }
 }

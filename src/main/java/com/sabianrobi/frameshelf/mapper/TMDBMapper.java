@@ -23,30 +23,30 @@ public class TMDBMapper {
     ) {
         return Movie.builder()
                 .adult(tmdbMovieDb.getAdult())
-                .backdrop_path(tmdbMovieDb.getBackdropPath())
-                .belongs_to_collection(collection)
+                .backdropPath(tmdbMovieDb.getBackdropPath())
+                .belongsToCollection(collection)
                 .budget(tmdbMovieDb.getBudget())
                 .genres(genres)
                 .homepage(tmdbMovieDb.getHomepage())
                 .id(tmdbMovieDb.getId())
-                .imdb_id(tmdbMovieDb.getImdbID())
-                .original_language(tmdbMovieDb.getOriginalLanguage())
-                .original_title(tmdbMovieDb.getOriginalTitle())
+                .imdbId(tmdbMovieDb.getImdbID())
+                .originalLanguage(tmdbMovieDb.getOriginalLanguage())
+                .originalTitle(tmdbMovieDb.getOriginalTitle())
                 .overview(tmdbMovieDb.getOverview())
                 .popularity(tmdbMovieDb.getPopularity())
-                .poster_path(tmdbMovieDb.getPosterPath())
-                .production_companies(productionCompanies)
-                .production_countries(productionCountries)
-                .release_date(tmdbMovieDb.getReleaseDate())
+                .posterPath(tmdbMovieDb.getPosterPath())
+                .productionCompanies(productionCompanies)
+                .productionCountries(productionCountries)
+                .releaseDate(tmdbMovieDb.getReleaseDate())
                 .revenue(tmdbMovieDb.getRevenue())
                 .runtime(tmdbMovieDb.getRuntime())
-                .spoken_languages(spokenLanguages)
+                .spokenLanguages(spokenLanguages)
                 .status(tmdbMovieDb.getStatus())
                 .tagline(tmdbMovieDb.getTagline())
                 .title(tmdbMovieDb.getTitle())
                 .video(tmdbMovieDb.getVideo())
-                .vote_average(tmdbMovieDb.getVoteAverage())
-                .vote_count(tmdbMovieDb.getVoteCount())
+                .voteAverage(tmdbMovieDb.getVoteAverage())
+                .voteCount(tmdbMovieDb.getVoteCount())
                 .build();
     }
 
@@ -54,9 +54,9 @@ public class TMDBMapper {
         return SearchMovieResponse.builder()
                 .id(tmdbMovie.getId())
                 .title(tmdbMovie.getTitle())
-                .release_date(tmdbMovie.getReleaseDate())
-                .original_title(tmdbMovie.getOriginalTitle())
-                .poster_path(tmdbMovie.getPosterPath())
+                .releaseDate(tmdbMovie.getReleaseDate())
+                .originalTitle(tmdbMovie.getOriginalTitle())
+                .posterPath(tmdbMovie.getPosterPath())
                 .build();
     }
 
@@ -69,12 +69,12 @@ public class TMDBMapper {
                 .gender(tmdbPerson.getGender().toValue())
                 .homepage(tmdbPerson.getHomepage())
                 .id(tmdbPerson.getId())
-                .imdb_id(tmdbPerson.getImdbId())
-                .known_for_department(tmdbPerson.getKnownForDepartment())
+                .imdbId(tmdbPerson.getImdbId())
+                .knownForDepartment(tmdbPerson.getKnownForDepartment())
                 .name(tmdbPerson.getName())
-                .place_of_birth(tmdbPerson.getPlaceOfBirth())
+                .placeOfBirth(tmdbPerson.getPlaceOfBirth())
                 .popularity(tmdbPerson.getPopularity())
-                .profile_path(tmdbPerson.getProfilePath())
+                .profilePath(tmdbPerson.getProfilePath())
                 .build();
     }
 
@@ -83,7 +83,7 @@ public class TMDBMapper {
         return SearchActorResponse.builder()
                 .id(tmdbPerson.getId())
                 .name(tmdbPerson.getName())
-                .profile_path(tmdbPerson.getProfilePath())
+                .profilePath(tmdbPerson.getProfilePath())
                 .build();
     }
 

@@ -11,13 +11,13 @@ public class MovieResponse {
     // More important fields
     int id;
     String title;
-    String release_date;
+    String releaseDate;
     int runtime;
-    String original_title;
-    String original_language;
+    String originalTitle;
+    String originalLanguage;
     String status;
-    double vote_average;
-    int vote_count;
+    double voteAverage;
+    int voteCount;
     Set<String> genres;
 
     // Less important fields

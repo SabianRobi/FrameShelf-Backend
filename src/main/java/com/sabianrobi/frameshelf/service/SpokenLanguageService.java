@@ -30,7 +30,7 @@ public class SpokenLanguageService {
                 final SpokenLanguage newSpokenLanguage = SpokenLanguage.builder()
                         .iso6391(spokenLanguage.getIso6391())
                         .name(spokenLanguage.getName())
-                        .english_name(spokenLanguage.getEnglishName())
+                        .englishName(spokenLanguage.getEnglishName())
                         .build();
 
                 newSpokenLanguages.add(newSpokenLanguage);

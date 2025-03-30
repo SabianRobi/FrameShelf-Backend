@@ -25,26 +25,26 @@ public class Movie {
     Set<Genre> genres;
 
     @ManyToOne
-    Collection belongs_to_collection;
+    Collection belongsToCollection;
 
     @ManyToMany
-    Set<ProductionCompany> production_companies;
+    Set<ProductionCompany> productionCompanies;
 
     @ManyToMany
-    Set<ProductionCountry> production_countries;
+    Set<ProductionCountry> productionCountries;
 
     @ManyToMany
-    Set<SpokenLanguage> spoken_languages;
+    Set<SpokenLanguage> spokenLanguages;
 
     // More important fields
     String title;
-    String release_date;
+    String releaseDate;
     int runtime;
-    String original_title;
-    String original_language;
+    String originalTitle;
+    String originalLanguage;
     String status;
-    double vote_average;
-    int vote_count;
+    double voteAverage;
+    int voteCount;
 
     // Less important fields
     String homepage;
@@ -52,14 +52,14 @@ public class Movie {
     @Size(max = 1000)
     String overview;
 
-    String imdb_id;
-    String poster_path;
+    String imdbId;
+    String posterPath;
     double popularity;
     long revenue;
     String tagline;
     boolean video;
     boolean adult;
-    String backdrop_path;
+    String backdropPath;
     int budget;
-//    Set<String> origin_country;
+//    Set<String> originCountry;
 }

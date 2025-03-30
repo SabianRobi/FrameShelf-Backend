@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 public class Collection {
     @Id
     int id;
-    
+
     String name;
-    String poster_path;
-    String backdrop_path;
+    String posterPath;
+    String backdropPath;
 }

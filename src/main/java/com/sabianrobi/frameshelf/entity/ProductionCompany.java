@@ -16,7 +16,7 @@ public class ProductionCompany {
     @Id
     int id;
 
-    String logo_path;
+    String logoPath;
     String name;
-    String origin_country;
+    String originCountry;
 }

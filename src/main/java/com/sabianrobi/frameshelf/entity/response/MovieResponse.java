@@ -3,12 +3,12 @@ package com.sabianrobi.frameshelf.entity.response;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.Set;
 
 @Data
 @Builder
 public class MovieResponse {
-    // More important fields
     int id;
     String title;
     String releaseDate;
@@ -19,8 +19,10 @@ public class MovieResponse {
     double voteAverage;
     int voteCount;
     Set<String> genres;
-
-    // Less important fields
     String homepage;
     String overview;
+    String posterPath;
+    String backdropPath;
+    String watchedLanguage;
+    Date watchedAt;
 }

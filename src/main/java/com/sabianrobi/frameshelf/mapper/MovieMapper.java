@@ -24,6 +24,10 @@ public class MovieMapper {
                 .originalLanguage(movie.getOriginalLanguage())
                 .homepage(movie.getHomepage())
                 .overview(movie.getOverview())
+                .posterPath(movie.getPosterPath())
+                .backdropPath(movie.getBackdropPath())
+                .watchedLanguage(movie.getWatchedLanguage())
+                .watchedAt(movie.getWatchedAt())
                 .build();
     }
 }

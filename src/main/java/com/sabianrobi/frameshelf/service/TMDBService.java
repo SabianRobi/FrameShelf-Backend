@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class TMDBService {
     //    Movies
     // ------------
 
-    public Movie createMovie(final int movieId) throws TmdbException {
+    public Movie createMovie(final int movieId, final String watchedLanguage, final Date watchedAt) throws TmdbException {
         final TmdbMovies tmdbMovies = tmdbApi.getMovies();
         final MovieDb tmdbMovie = tmdbMovies.getDetails(movieId, language);
 
@@ -69,7 +70,7 @@ public class TMDBService {
         final Set<ProductionCountry> productionCountries = productionCountryService.createProductionCountries(tmdbMovie.getProductionCountries());
         final Set<SpokenLanguage> spokenLanguages = spokenLanguageService.createSpokenLanguages(tmdbMovie.getSpokenLanguages());
 
-        return tmdbMapper.mapTMDBMovieDbToMovie(tmdbMovie, genres, collection, productionCompanies, productionCountries, spokenLanguages);
+        return tmdbMapper.mapTMDBMovieDbToMovie(tmdbMovie, genres, collection, productionCompanies, productionCountries, spokenLanguages, watchedLanguage, watchedAt);
     }
 
     public Page<SearchMovieResponse> searchMovie(final String query, final int page) throws TmdbException {

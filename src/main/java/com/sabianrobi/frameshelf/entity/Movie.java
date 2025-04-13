@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.Set;
 
 @Data
@@ -41,25 +42,29 @@ public class Movie {
     String releaseDate;
     int runtime;
     String originalTitle;
-    String originalLanguage;
     String status;
-    double voteAverage;
-    int voteCount;
-
-    // Less important fields
-    String homepage;
+    String posterPath;
+    String backdropPath;
+    // String originCountry; // TODO: The API wrapper does not support this field
 
     @Size(max = 1000)
     String overview;
 
+    // Fields that should be in the relation between Movie and User
+    Date watchedAt;
+    String watchedLanguage;
+
+    // Less important fields
+    String originalLanguage;
+    String homepage;
+    double voteAverage;
+    int voteCount;
+
     String imdbId;
-    String posterPath;
     double popularity;
     long revenue;
     String tagline;
     boolean video;
     boolean adult;
-    String backdropPath;
     int budget;
-//    Set<String> originCountry;
 }

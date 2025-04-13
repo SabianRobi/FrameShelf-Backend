@@ -10,6 +10,7 @@ import info.movito.themoviedbapi.model.movies.MovieDb;
 import info.movito.themoviedbapi.model.people.PersonDb;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Set;
 
 @Component
@@ -19,7 +20,9 @@ public class TMDBMapper {
                                        final Collection collection,
                                        final Set<ProductionCompany> productionCompanies,
                                        final Set<ProductionCountry> productionCountries,
-                                       final Set<SpokenLanguage> spokenLanguages
+                                       final Set<SpokenLanguage> spokenLanguages,
+                                       final String watchedLanguage,
+                                       final Date watchedAt
     ) {
         return Movie.builder()
                 .adult(tmdbMovieDb.getAdult())
@@ -47,6 +50,8 @@ public class TMDBMapper {
                 .video(tmdbMovieDb.getVideo())
                 .voteAverage(tmdbMovieDb.getVoteAverage())
                 .voteCount(tmdbMovieDb.getVoteCount())
+                .watchedLanguage(watchedLanguage)
+                .watchedAt(watchedAt)
                 .build();
     }
 

@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -87,9 +88,18 @@ public class MovieService {
     public MovieResponse createMovie(final CreateMovieRequest createMovieRequest) {
         final Movie movie;
 
+        // Set default values for optional fields
+        if (createMovieRequest.getWatchedAt() == null) {
+            createMovieRequest.setWatchedAt(new Date());
+        }
+
+        if (createMovieRequest.getWatchedLanguage() == null) {
+            createMovieRequest.setWatchedLanguage("hu");
+        }
+
         // Get movie details from the TMDB API
         try {
-            movie = tmdbService.createMovie(createMovieRequest.getId());
+            movie = tmdbService.createMovie(createMovieRequest.getId(), createMovieRequest.getWatchedLanguage(), createMovieRequest.getWatchedAt());
             repository.save(movie);
         } catch (final TmdbException e) {
             throw new RuntimeException(e);

@@ -3,6 +3,7 @@ package com.sabianrobi.frameshelf.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.sabianrobi.frameshelf.entity.response.GetLoginUrlResponse;
+import com.sabianrobi.frameshelf.service.GoogleUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,10 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
-import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -27,10 +26,17 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final GoogleUserService googleUserService;
+
+    public SecurityConfig(final GoogleUserService googleUserService) {
+        this.googleUserService = googleUserService;
+    }
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000/", "http://127.0.0.1:3000/", "http://frameshelf.local:3000/"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://frameshelf.local:3000"));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -42,7 +48,7 @@ public class SecurityConfig {
 
     @Bean
     AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
-        return new HttpSessionOAuth2AuthorizationRequestRepository();
+        return new StatelessAuthorizationRequestRepository();
     }
 
     @Bean
@@ -54,13 +60,13 @@ public class SecurityConfig {
                         .requestMatchers(
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/authorize/**"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/callback/**"),
+                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/user"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/error")
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .maximumSessions(1)
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
                 .exceptionHandling(exception -> exception
@@ -69,6 +75,11 @@ public class SecurityConfig {
 
         // Configure OAuth2 login
         http.oauth2Login(oauth2 -> {
+            // Configure the user info endpoint to use our custom service
+            oauth2.userInfoEndpoint(userInfo ->
+                    userInfo.userService(googleUserService)
+            );
+
             // Configure authorization endpoint: Return a login URL in JSON format
             // Frontend can use this URL to redirect the user to.
             oauth2.authorizationEndpoint(authEndpoint -> {
@@ -108,7 +119,7 @@ public class SecurityConfig {
                 response.getWriter().write(json);
             });
 
-            // Configure failure handler
+            // Configure the failure handler
             // When the user fails to log in, an error message is returned in JSON format.
             oauth2.failureHandler((request, response, exception) -> {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -127,16 +138,16 @@ public class SecurityConfig {
                 )
         );
 
-        // Disable CSRF
-        http.csrf(AbstractHttpConfigurer::disable);
+        // Enable CSRF protection
+        http.csrf(csrf -> csrf
+                .ignoringRequestMatchers(
+                        // Exclude OAuth2 endpoints from CSRF protection
+                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/authorize/**"),
+                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/callback/**"),
+                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/user")
+                )
+        );
 
         return http.build();
-
-//                .oauth2Login(oauth2 ->
-//                        oauth2.userInfoEndpoint(user ->
-//                                        user.userService(GoogleCredentialService)
-//                                )
-//                                .defaultSuccessUrl("/api/v1/films")
-//                )
     }
 }

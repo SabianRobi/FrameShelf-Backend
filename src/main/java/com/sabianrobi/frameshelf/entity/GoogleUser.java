@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @Builder
@@ -20,10 +22,10 @@ public class GoogleUser {
     @Column(unique = true)
     private String email;
 
-    @Column(length = 1024)
+    @Column(length = 1536)
     private String picture;
-    
+
     private String fullName;
-    private java.time.LocalDateTime createdAt;
-    private java.time.LocalDateTime lastLoginAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime lastLoginAt;
 }

@@ -37,6 +37,9 @@ public class MovieService {
     @Autowired
     private MovieMapper movieMapper;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     public Page<MovieResponse> getMovies(final GetMoviesRequest request) {
         // Create filter DTO
         final MovieFilterDto filterDto = MovieFilterDto.builder()
@@ -125,8 +128,7 @@ public class MovieService {
 
     private List<SortDto> jsonStringToSortDto(final String jsonString) {
         try {
-            ObjectMapper obj = new ObjectMapper();
-            return obj.readValue(jsonString, new TypeReference<>() {
+            return objectMapper.readValue(jsonString, new TypeReference<>() {
             });
         } catch (final Exception e) {
             System.out.println("Exception: " + e);

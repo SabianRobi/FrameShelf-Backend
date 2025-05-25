@@ -1,7 +1,10 @@
 package com.sabianrobi.frameshelf.service;
 
 import com.sabianrobi.frameshelf.entity.GoogleUser;
+import com.sabianrobi.frameshelf.entity.User;
 import com.sabianrobi.frameshelf.repository.GoogleUserRepository;
+import com.sabianrobi.frameshelf.security.CustomOAuth2User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -16,12 +19,13 @@ import java.util.Optional;
 @Service
 public class GoogleUserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
-    private final GoogleUserRepository googleUserRepository;
-    private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+    @Autowired
+    private GoogleUserRepository googleUserRepository;
 
-    public GoogleUserService(final GoogleUserRepository googleUserRepository) {
-        this.googleUserRepository = googleUserRepository;
-    }
+    @Autowired
+    private UserService userService;
+
+    private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
     @Override
     public OAuth2User loadUser(final OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -57,10 +61,13 @@ public class GoogleUserService implements OAuth2UserService<OAuth2UserRequest, O
                     .build();
         }
 
-        // Save user to the database
+        // Save GoogleUser to the database
         googleUserRepository.save(googleUser);
 
-        // Return the original OAuth2User
-        return oAuth2User;
+        // Find or create a User entity for this GoogleUser
+        User user = userService.findOrCreateUserForGoogleUser(googleUser);
+
+        // Return a CustomOAuth2User that wraps the original OAuth2User and includes our User entity
+        return new CustomOAuth2User(oAuth2User, user, "sub");
     }
 }

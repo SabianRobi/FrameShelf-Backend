@@ -3,7 +3,10 @@ package com.sabianrobi.frameshelf.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.sabianrobi.frameshelf.entity.response.GetLoginUrlResponse;
+import com.sabianrobi.frameshelf.entity.response.UserResponse;
+import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.GoogleUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,11 +30,11 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final GoogleUserService googleUserService;
+    @Autowired
+    private GoogleUserService googleUserService;
 
-    public SecurityConfig(final GoogleUserService googleUserService) {
-        this.googleUserService = googleUserService;
-    }
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -60,13 +63,13 @@ public class SecurityConfig {
                         .requestMatchers(
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/authorize/**"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/callback/**"),
-                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/user"),
+                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/user/me"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/error")
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 )
 
                 .exceptionHandling(exception -> exception
@@ -92,7 +95,7 @@ public class SecurityConfig {
                     final GetLoginUrlResponse getLoginUrlResponse = GetLoginUrlResponse.builder()
                             .url(url)
                             .build();
-                    final ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                    final ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
                     final String json = ow.writeValueAsString(getLoginUrlResponse);
                     response.getWriter().write(json);
                 });
@@ -106,16 +109,17 @@ public class SecurityConfig {
             );
 
             // Configure the success handler
-            // When the user logs in successfully, the OAuth2 user information is returned in JSON format.
+            // When the user logs in successfully, the UserResponse is returned in JSON format.
             oauth2.successHandler((request, response, authentication) -> {
                 response.setStatus(HttpStatus.OK.value());
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
 
-                // Get the OAuth2 user
-                final ObjectMapper mapper = new ObjectMapper();
-                final ObjectWriter writer = mapper.writer().withDefaultPrettyPrinter();
-                final String json = writer.writeValueAsString(authentication.getPrincipal());
+                // Get the CustomOAuth2User and extract the User entity, then convert to UserResponse
+                final CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+                final UserResponse userResponse = UserResponse.fromUser(customOAuth2User.getUser());
+                final ObjectWriter writer = objectMapper.writer().withDefaultPrettyPrinter();
+                final String json = writer.writeValueAsString(userResponse);
                 response.getWriter().write(json);
             });
 
@@ -141,10 +145,11 @@ public class SecurityConfig {
         // Enable CSRF protection
         http.csrf(csrf -> csrf
                 .ignoringRequestMatchers(
-                        // Exclude OAuth2 endpoints from CSRF protection
+                        // Exclude OAuth2 and user endpoints from CSRF protection
                         AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/authorize/**"),
                         AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/callback/**"),
-                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/user")
+                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/user/me"),
+                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/user/{id}")
                 )
         );
 

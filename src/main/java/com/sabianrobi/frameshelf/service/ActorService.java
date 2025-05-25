@@ -35,6 +35,9 @@ public class ActorService {
     @Autowired
     private ActorMapper actorMapper;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     public Page<ActorResponse> getActors(final GetActorsRequest request) {
         // Create filter DTO
         final ActorFilterDto filterDto = ActorFilterDto.builder()
@@ -53,7 +56,7 @@ public class ActorService {
             }
         }
 
-        // Create page request with sorting
+        // Create a page request with sorting
         final PageRequest pageRequest = PageRequest.of(
                 request.getPage(),
                 request.getSize(),
@@ -105,8 +108,7 @@ public class ActorService {
 
     private List<SortDto> jsonStringToSortDto(final String jsonString) {
         try {
-            ObjectMapper obj = new ObjectMapper();
-            return obj.readValue(jsonString, new TypeReference<>() {
+            return objectMapper.readValue(jsonString, new TypeReference<>() {
             });
         } catch (final Exception e) {
             System.out.println("Exception: " + e);

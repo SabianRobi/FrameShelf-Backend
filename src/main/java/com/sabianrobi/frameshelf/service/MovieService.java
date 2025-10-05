@@ -47,11 +47,11 @@ public class MovieService {
                 .build();
 
         // Parse and create sort orders
-        final List<SortDto> sortDtos = jsonStringToSortDto(request.getSort());
+        final List<SortDto> sortDTOs = jsonStringToSortDto(request.getSort());
         final List<Sort.Order> orders = new ArrayList<>();
 
-        if (sortDtos != null) {
-            for (final SortDto sortDto : sortDtos) {
+        if (sortDTOs != null) {
+            for (final SortDto sortDto : sortDTOs) {
                 Sort.Direction direction = Objects.equals(sortDto.getDirection(), "desc")
                         ? Sort.Direction.DESC : Sort.Direction.ASC;
                 orders.add(new Sort.Order(direction, sortDto.getField()));
@@ -111,10 +111,6 @@ public class MovieService {
         return movieMapper.mapMovieToMovieResponse(movie);
     }
 
-    public void deleteMovie(final int id) {
-        repository.deleteById(id);
-    }
-
     public Page<SearchMovieResponse> search(final String query, final int page) {
         // Search in the TMDB API
         try {
@@ -125,7 +121,6 @@ public class MovieService {
     }
 
     // Utility methods
-
     private List<SortDto> jsonStringToSortDto(final String jsonString) {
         try {
             return objectMapper.readValue(jsonString, new TypeReference<>() {

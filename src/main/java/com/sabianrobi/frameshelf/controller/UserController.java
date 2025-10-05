@@ -5,6 +5,7 @@ import com.sabianrobi.frameshelf.entity.response.UserResponse;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,11 +26,11 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable final String id) {
         try {
-            UUID userId = UUID.fromString(id);
-            Optional<User> user = userService.findById(userId);
+            final UUID userId = UUID.fromString(id);
+            final Optional<User> user = userService.findById(userId);
             return user.map(u -> ResponseEntity.ok(UserResponse.fromUser(u)))
                     .orElse(ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             // Invalid UUID format
             return ResponseEntity.badRequest().build();
         }
@@ -37,6 +38,10 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        if (customOAuth2User == null || customOAuth2User.getUser() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         return ResponseEntity.ok(UserResponse.fromUser(customOAuth2User.getUser()));
     }
 }

@@ -9,7 +9,6 @@ import com.sabianrobi.frameshelf.service.GoogleUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,7 +18,6 @@ import org.springframework.security.oauth2.client.web.AuthorizationRequestReposi
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -61,10 +59,11 @@ public class SecurityConfig {
                 .headers(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/authorize/**"),
-                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/callback/**"),
-                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/user/me"),
-                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/error")
+                                "/api/v1/auth/login/oauth2/authorize/**",
+                                "/api/v1/auth/login/oauth2/callback/**",
+                                "/api/v1/user/me",
+                                "/api/v1/auth/logout",
+                                "/error"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -146,10 +145,12 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf
                 .ignoringRequestMatchers(
                         // Exclude OAuth2 and user endpoints from CSRF protection
-                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/authorize/**"),
-                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/auth/login/oauth2/callback/**"),
-                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/user/me"),
-                        AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/user/{id}")
+                        "/api/v1/auth/login/oauth2/authorize/**",
+                        "/api/v1/auth/login/oauth2/callback/**",
+                        "/api/v1/user/me",
+                        "/api/v1/auth/logout",
+                        "/api/v1/user/{id}",
+                        "/api/v1/user/{userId}/movies"
                 )
         );
 

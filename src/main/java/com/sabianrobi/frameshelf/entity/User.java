@@ -38,4 +38,7 @@ public class User {
 
     @OneToMany
     private Set<Actor> followedActors;
+
+    @OneToMany
+    private Set<List> lists;
 }

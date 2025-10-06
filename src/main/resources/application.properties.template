@@ -1,0 +1,24 @@
+spring.application.name=frameshelf
+
+# OAuth2
+spring.security.oauth2.client.registration.google.client-id=
+spring.security.oauth2.client.registration.google.client-secret=
+spring.security.oauth2.client.registration.google.scope=profile,email
+spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:3000/auth/login/oauth2/callback/google
+
+# Database
+jakarta.persistence.jdbc.url=jdbc:mariadb://192.168.1.200:3306/frameshelf
+spring.datasource.url=jdbc:mariadb://192.168.1.200:3306/frameshelf
+spring.datasource.username=
+spring.datasource.password=
+spring.datasource.driverClassName=org.mariadb.jdbc.Driver
+spring.jpa.hibernate.ddl-auto=update
+
+# The Movie Database read key
+tmdb.api.read-key=
+
+# Session Configuration
+server.servlet.session.cookie.http-only=true
+server.servlet.session.cookie.secure=false
+server.servlet.session.cookie.same-site=lax
+server.servlet.session.timeout=30m

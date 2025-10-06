@@ -58,5 +58,4 @@ public class ActorController {
 
         return ResponseEntity.ok(actorService.search(query, page));
     }
-
 }

@@ -6,6 +6,10 @@ import com.sabianrobi.frameshelf.entity.response.GetLoginUrlResponse;
 import com.sabianrobi.frameshelf.entity.response.UserResponse;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.GoogleUserService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +22,17 @@ import org.springframework.security.oauth2.client.web.AuthorizationRequestReposi
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.*;
+import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Configuration
 @EnableWebSecurity
@@ -110,6 +120,13 @@ public class SecurityConfig {
             // Configure the success handler
             // When the user logs in successfully, the UserResponse is returned in JSON format.
             oauth2.successHandler((request, response, authentication) -> {
+                // Regenerate CSRF token after successful OAuth2 login
+                final CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+                final CsrfToken newToken = tokenRepository.generateToken(request);
+                tokenRepository.saveToken(newToken, request, response);
+                request.setAttribute(CsrfToken.class.getName(), newToken);
+                request.setAttribute("_csrf", newToken);
+
                 response.setStatus(HttpStatus.OK.value());
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
@@ -141,19 +158,45 @@ public class SecurityConfig {
                 )
         );
 
-        // Enable CSRF protection
+        // Enable CSRF protection with cookie repository for SPA
         http.csrf(csrf -> csrf
-                .ignoringRequestMatchers(
-                        // Exclude OAuth2 and user endpoints from CSRF protection
-                        "/api/v1/auth/login/oauth2/authorize/**",
-                        "/api/v1/auth/login/oauth2/callback/**",
-                        "/api/v1/user/me",
-                        "/api/v1/auth/logout",
-                        "/api/v1/user/{id}",
-                        "/api/v1/user/{userId}/movies"
-                )
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
         );
 
+        // Add CSRF token to response
+        http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
+
         return http.build();
+    }
+
+    // Custom CSRF handler for SPA applications
+    private static final class SpaCsrfTokenRequestHandler extends CsrfTokenRequestAttributeHandler {
+        private final CsrfTokenRequestHandler delegate = new XorCsrfTokenRequestAttributeHandler();
+
+        @Override
+        public void handle(final HttpServletRequest request, final HttpServletResponse response,
+                           final Supplier<CsrfToken> csrfToken) {
+            this.delegate.handle(request, response, csrfToken);
+        }
+
+        @Override
+        public String resolveCsrfTokenValue(final HttpServletRequest request, final CsrfToken csrfToken) {
+            if (StringUtils.hasText(request.getHeader(csrfToken.getHeaderName()))) {
+                return super.resolveCsrfTokenValue(request, csrfToken);
+            }
+            return this.delegate.resolveCsrfTokenValue(request, csrfToken);
+        }
+    }
+
+    // Filter to ensure CSRF token is in cookie
+    private static final class CsrfCookieFilter extends OncePerRequestFilter {
+        @Override
+        protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
+                                        final FilterChain filterChain) throws ServletException, IOException {
+            CsrfToken csrfToken = (CsrfToken) request.getAttribute("_csrf");
+            csrfToken.getToken(); // Force token generation
+            filterChain.doFilter(request, response);
+        }
     }
 }

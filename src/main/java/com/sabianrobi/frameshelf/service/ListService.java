@@ -1,6 +1,7 @@
 package com.sabianrobi.frameshelf.service;
 
 import com.sabianrobi.frameshelf.entity.*;
+import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
 import com.sabianrobi.frameshelf.repository.ActorListRepository;
 import com.sabianrobi.frameshelf.repository.ActorRepository;
 import com.sabianrobi.frameshelf.repository.MovieListRepository;
@@ -128,6 +129,33 @@ public class ListService {
             }
 
             actorList.getActors().removeIf(actor -> actor.getId() == itemId);
+            return actorListRepository.save(actorList);
+        }
+
+        throw new RuntimeException("List not found");
+    }
+
+    @Transactional
+    public List updateList(final UUID listId, final UpdateListRequest request, final UUID userId) {
+        // Try MovieList first
+        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
+        if (movieListOpt.isPresent()) {
+            final MovieList movieList = movieListOpt.get();
+            if (!movieList.getUser().getId().equals(userId)) {
+                throw new RuntimeException("User doesn't have access to this list");
+            }
+            movieList.setName(request.getName());
+            return movieListRepository.save(movieList);
+        }
+
+        // Try ActorList
+        final Optional<ActorList> actorListOpt = actorListRepository.findById(listId);
+        if (actorListOpt.isPresent()) {
+            final ActorList actorList = actorListOpt.get();
+            if (!actorList.getUser().getId().equals(userId)) {
+                throw new RuntimeException("User doesn't have access to this list");
+            }
+            actorList.setName(request.getName());
             return actorListRepository.save(actorList);
         }
 

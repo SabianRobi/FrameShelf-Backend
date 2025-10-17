@@ -4,6 +4,7 @@ import com.sabianrobi.frameshelf.entity.List;
 import com.sabianrobi.frameshelf.entity.User;
 import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.CreateListRequest;
+import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
 import com.sabianrobi.frameshelf.entity.response.ListResponse;
 import com.sabianrobi.frameshelf.mapper.ActorMapper;
 import com.sabianrobi.frameshelf.mapper.MovieMapper;
@@ -132,6 +133,31 @@ public class ListController {
             }
 
             final List updatedList = listService.removeItemFromList(listUuid, itemId, user.getId());
+            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, actorMapper));
+        } catch (final IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (final RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{userId}/lists/{listId}")
+    public ResponseEntity<ListResponse> updateList(
+            @PathVariable("userId") final String userId,
+            @PathVariable("listId") final String listId,
+            @RequestBody final UpdateListRequest request,
+            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        try {
+            final UUID userUuid = UUID.fromString(userId);
+            final UUID listUuid = UUID.fromString(listId);
+            final User user = customOAuth2User.getUser();
+
+            // Verify the authenticated user matches the path parameter
+            if (!user.getId().equals(userUuid)) {
+                return ResponseEntity.status(403).build();
+            }
+
+            final List updatedList = listService.updateList(listUuid, request, user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, actorMapper));
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

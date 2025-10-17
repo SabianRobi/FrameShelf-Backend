@@ -4,29 +4,44 @@ import com.sabianrobi.frameshelf.entity.List;
 import com.sabianrobi.frameshelf.entity.User;
 import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.CreateListRequest;
+import com.sabianrobi.frameshelf.entity.response.ListResponse;
+import com.sabianrobi.frameshelf.mapper.ActorMapper;
+import com.sabianrobi.frameshelf.mapper.MovieMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.ListService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/user")
-@RequiredArgsConstructor
 public class ListController {
+
+    @Autowired
     private ListService listService;
 
+    @Autowired
+    private MovieMapper movieMapper;
+
+    @Autowired
+    private ActorMapper actorMapper;
+
     @GetMapping("/{userId}/lists")
-    public ResponseEntity<java.util.List<List>> getUserLists(
+    public ResponseEntity<java.util.List<ListResponse>> getUserLists(
             @PathVariable("userId") final String userId) {
         try {
             final UUID userUuid = UUID.fromString(userId);
             final java.util.List<List> lists = listService.getUserLists(userUuid);
 
-            return ResponseEntity.ok(lists);
+            final java.util.List<ListResponse> listResponses = lists.stream()
+                    .map(list -> ListResponse.fromList(list, movieMapper, actorMapper))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(listResponses);
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
@@ -35,7 +50,7 @@ public class ListController {
     }
 
     @GetMapping("/{userId}/lists/{listId}")
-    public ResponseEntity<List> getListById(
+    public ResponseEntity<ListResponse> getListById(
             @PathVariable("userId") final String userId,
             @PathVariable("listId") final String listId) {
         try {
@@ -43,7 +58,7 @@ public class ListController {
             final UUID listUuid = UUID.fromString(listId);
             final List list = listService.getListById(listUuid, userUuid);
 
-            return ResponseEntity.ok(list);
+            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, actorMapper));
 
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -53,7 +68,7 @@ public class ListController {
     }
 
     @PostMapping("/{userId}/lists")
-    public ResponseEntity<List> createList(
+    public ResponseEntity<ListResponse> createList(
             @PathVariable("userId") final String userId,
             @RequestBody final CreateListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
@@ -67,7 +82,7 @@ public class ListController {
             }
 
             final List list = listService.createList(user, request.getName(), request.getType());
-            return ResponseEntity.ok(list);
+            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, actorMapper));
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
@@ -76,7 +91,7 @@ public class ListController {
     }
 
     @PostMapping("/{userId}/lists/{listId}/items")
-    public ResponseEntity<List> addItemToList(
+    public ResponseEntity<ListResponse> addItemToList(
             @PathVariable("userId") final String userId,
             @PathVariable("listId") final String listId,
             @RequestBody final AddItemToListRequest request,
@@ -92,7 +107,7 @@ public class ListController {
             }
 
             final List updatedList = listService.addItemToList(listUuid, request.getItemId(), user.getId());
-            return ResponseEntity.ok(updatedList);
+            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, actorMapper));
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
@@ -101,7 +116,7 @@ public class ListController {
     }
 
     @DeleteMapping("/{userId}/lists/{listId}/items/{itemId}")
-    public ResponseEntity<List> removeItemFromList(
+    public ResponseEntity<ListResponse> removeItemFromList(
             @PathVariable("userId") final String userId,
             @PathVariable("listId") final String listId,
             @PathVariable("itemId") final Integer itemId,
@@ -117,7 +132,7 @@ public class ListController {
             }
 
             final List updatedList = listService.removeItemFromList(listUuid, itemId, user.getId());
-            return ResponseEntity.ok(updatedList);
+            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, actorMapper));
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {

@@ -5,7 +5,7 @@ import com.sabianrobi.frameshelf.repository.ActorListRepository;
 import com.sabianrobi.frameshelf.repository.ActorRepository;
 import com.sabianrobi.frameshelf.repository.MovieListRepository;
 import com.sabianrobi.frameshelf.repository.MovieRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +14,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class ListService {
+    @Autowired
     private MovieListRepository movieListRepository;
+
+    @Autowired
     private ActorListRepository actorListRepository;
+
+    @Autowired
     private MovieRepository movieRepository;
+
+    @Autowired
     private ActorRepository actorRepository;
 
     public java.util.List<List> getUserLists(final UUID userId) {

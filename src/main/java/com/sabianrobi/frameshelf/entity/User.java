@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,12 +34,7 @@ public class User {
     @OneToOne
     private GoogleUser googleUser;
 
-    @OneToMany
-    private Set<Movie> likedMovies;
-
-    @OneToMany
-    private Set<Actor> followedActors;
-
-    @OneToMany
-    private Set<List> lists;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<List> lists = new HashSet<>();
 }

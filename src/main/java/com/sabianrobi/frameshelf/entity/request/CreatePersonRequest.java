@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CreateActorRequest {
+public class CreatePersonRequest {
     @NotNull
     int id;
 }

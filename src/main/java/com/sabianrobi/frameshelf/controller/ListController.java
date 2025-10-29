@@ -6,8 +6,8 @@ import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.CreateListRequest;
 import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
 import com.sabianrobi.frameshelf.entity.response.ListResponse;
-import com.sabianrobi.frameshelf.mapper.ActorMapper;
 import com.sabianrobi.frameshelf.mapper.MovieMapper;
+import com.sabianrobi.frameshelf.mapper.PersonMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.ListService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class ListController {
     private MovieMapper movieMapper;
 
     @Autowired
-    private ActorMapper actorMapper;
+    private PersonMapper personMapper;
 
     @GetMapping("/{userId}/lists")
     public ResponseEntity<java.util.List<ListResponse>> getUserLists(
@@ -39,7 +39,7 @@ public class ListController {
             final java.util.List<List> lists = listService.getUserLists(userUuid);
 
             final java.util.List<ListResponse> listResponses = lists.stream()
-                    .map(list -> ListResponse.fromList(list, movieMapper, actorMapper))
+                    .map(list -> ListResponse.fromList(list, movieMapper, personMapper))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(listResponses);
@@ -59,7 +59,7 @@ public class ListController {
             final UUID listUuid = UUID.fromString(listId);
             final List list = listService.getListById(listUuid, userUuid);
 
-            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, actorMapper));
+            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
 
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -83,7 +83,7 @@ public class ListController {
             }
 
             final List list = listService.createList(user, request.getName(), request.getType());
-            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, actorMapper));
+            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
@@ -108,7 +108,7 @@ public class ListController {
             }
 
             final List updatedList = listService.addItemToList(listUuid, request.getItemId(), user.getId());
-            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, actorMapper));
+            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
@@ -133,7 +133,7 @@ public class ListController {
             }
 
             final List updatedList = listService.removeItemFromList(listUuid, itemId, user.getId());
-            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, actorMapper));
+            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
@@ -158,7 +158,7 @@ public class ListController {
             }
 
             final List updatedList = listService.updateList(listUuid, request, user.getId());
-            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, actorMapper));
+            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {

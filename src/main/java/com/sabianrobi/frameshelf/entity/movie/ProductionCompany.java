@@ -1,4 +1,4 @@
-package com.sabianrobi.frameshelf.entity;
+package com.sabianrobi.frameshelf.entity.movie;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductionCountry {
+public class ProductionCompany {
     @Id
-    String iso31661;
+    int id;
 
+    String logoPath;
     String name;
+    String originCountry;
 }

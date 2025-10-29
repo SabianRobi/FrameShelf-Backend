@@ -1,6 +1,6 @@
 package com.sabianrobi.frameshelf.service;
 
-import com.sabianrobi.frameshelf.entity.ProductionCountry;
+import com.sabianrobi.frameshelf.entity.movie.ProductionCountry;
 import com.sabianrobi.frameshelf.repository.ProductionCountryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

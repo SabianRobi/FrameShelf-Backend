@@ -1,7 +1,7 @@
 package com.sabianrobi.frameshelf.specification;
 
 import com.sabianrobi.frameshelf.entity.Movie;
-import com.sabianrobi.frameshelf.entity.utility.MovieFilterDto;
+import com.sabianrobi.frameshelf.entity.utility.MovieFilter;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -10,7 +10,7 @@ import java.util.List;
 
 public class MovieSpecification {
 
-    public static Specification<Movie> getSpecification(final MovieFilterDto filterDto) {
+    public static Specification<Movie> getSpecification(final MovieFilter filterDto) {
         return (root, query, criteriaBuilder) -> {
 
             List<Predicate> predicates = new ArrayList<>();

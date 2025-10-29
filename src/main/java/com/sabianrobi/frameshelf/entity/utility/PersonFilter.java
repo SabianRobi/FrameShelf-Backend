@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class SortDto {
-    private String field;
-    private String direction;
+public class PersonFilter {
+    private String name;
 }

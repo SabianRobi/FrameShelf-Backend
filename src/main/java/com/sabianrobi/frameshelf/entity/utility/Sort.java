@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ActorFilterDto {
-    private String name;
+public class Sort {
+    private String field;
+    private String direction;
 }

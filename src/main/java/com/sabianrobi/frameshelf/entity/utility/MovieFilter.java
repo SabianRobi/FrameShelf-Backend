@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MovieFilterDto {
+public class MovieFilter {
     private String title;
 }

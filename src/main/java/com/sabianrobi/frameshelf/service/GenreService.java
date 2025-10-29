@@ -1,6 +1,6 @@
 package com.sabianrobi.frameshelf.service;
 
-import com.sabianrobi.frameshelf.entity.Genre;
+import com.sabianrobi.frameshelf.entity.movie.Genre;
 import com.sabianrobi.frameshelf.repository.GenreRepository;
 import info.movito.themoviedbapi.model.core.IdElement;
 import org.springframework.beans.factory.annotation.Autowired;

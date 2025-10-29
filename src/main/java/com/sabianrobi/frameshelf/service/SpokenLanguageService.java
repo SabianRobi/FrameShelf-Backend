@@ -1,6 +1,6 @@
 package com.sabianrobi.frameshelf.service;
 
-import com.sabianrobi.frameshelf.entity.SpokenLanguage;
+import com.sabianrobi.frameshelf.entity.movie.SpokenLanguage;
 import com.sabianrobi.frameshelf.repository.SpokenLanguageRepository;
 import info.movito.themoviedbapi.model.core.Language;
 import org.springframework.beans.factory.annotation.Autowired;

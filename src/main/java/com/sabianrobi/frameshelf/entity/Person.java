@@ -1,5 +1,6 @@
 package com.sabianrobi.frameshelf.entity;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Size;
@@ -8,32 +9,44 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Actor {
-    // More important fields
-    @Id
-    private int id;
+public class Person {
+    private boolean adult;
 
-    private String name;
-    private String birthday;
-    private String profilePath;
+    @ElementCollection
+    private List<String> alsoKnownAs;
 
-
-    // Less important fields
     @Size(max = 10_000)
     private String biography;
 
-    private boolean adult;
-    //    private List<String> alsoKnownAs;
+    private String birthday;
+
     private String deathday;
-    private int gender;
+
+    @Builder.Default
+    private int gender = 0;
+
     private String homepage;
+
+    @Id
+    @Builder.Default
+    private int id = 0;
+
     private String imdbId;
+
     private String knownForDepartment;
+
+    private String name;
+
     private String placeOfBirth;
+
     private double popularity;
+
+    private String profilePath;
 }

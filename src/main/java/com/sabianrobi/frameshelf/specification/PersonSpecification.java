@@ -1,16 +1,16 @@
 package com.sabianrobi.frameshelf.specification;
 
-import com.sabianrobi.frameshelf.entity.Actor;
-import com.sabianrobi.frameshelf.entity.utility.ActorFilterDto;
+import com.sabianrobi.frameshelf.entity.Person;
+import com.sabianrobi.frameshelf.entity.utility.PersonFilter;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActorSpecification {
+public class PersonSpecification {
 
-    public static Specification<Actor> getSpecification(final ActorFilterDto filterDto) {
+    public static Specification<Person> getSpecification(final PersonFilter filterDto) {
         return (root, query, criteriaBuilder) -> {
 
             List<Predicate> predicates = new ArrayList<>();

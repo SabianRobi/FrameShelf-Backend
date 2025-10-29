@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class GetActorsRequest {
+public class GetPeopleRequest {
     // Filtering
     private String name;
 

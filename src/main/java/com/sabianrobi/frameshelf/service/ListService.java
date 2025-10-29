@@ -2,10 +2,10 @@ package com.sabianrobi.frameshelf.service;
 
 import com.sabianrobi.frameshelf.entity.*;
 import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
-import com.sabianrobi.frameshelf.repository.ActorListRepository;
-import com.sabianrobi.frameshelf.repository.ActorRepository;
 import com.sabianrobi.frameshelf.repository.MovieListRepository;
 import com.sabianrobi.frameshelf.repository.MovieRepository;
+import com.sabianrobi.frameshelf.repository.PersonListRepository;
+import com.sabianrobi.frameshelf.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,18 +20,18 @@ public class ListService {
     private MovieListRepository movieListRepository;
 
     @Autowired
-    private ActorListRepository actorListRepository;
+    private PersonListRepository personListRepository;
 
     @Autowired
     private MovieRepository movieRepository;
 
     @Autowired
-    private ActorRepository actorRepository;
+    private PersonRepository personRepository;
 
     public java.util.List<List> getUserLists(final UUID userId) {
         final java.util.List<List> allLists = new ArrayList<>();
         allLists.addAll(movieListRepository.findByUserId(userId));
-        allLists.addAll(actorListRepository.findByUserId(userId));
+        allLists.addAll(personListRepository.findByUserId(userId));
 
         return allLists;
     }
@@ -44,7 +44,7 @@ public class ListService {
         }
 
         // Try to find as ActorList
-        final Optional<ActorList> actorList = actorListRepository.findById(listId);
+        final Optional<PersonList> actorList = personListRepository.findById(listId);
         if (actorList.isPresent() && actorList.get().getUser().getId().equals(userId)) {
             return actorList.get();
         }
@@ -61,11 +61,11 @@ public class ListService {
                     .build();
             return movieListRepository.save(movieList);
         } else if ("ACTOR".equalsIgnoreCase(type)) {
-            final ActorList actorList = ActorList.builder()
+            final PersonList personList = PersonList.builder()
                     .name(name)
                     .user(user)
                     .build();
-            return actorListRepository.save(actorList);
+            return personListRepository.save(personList);
         } else {
             throw new IllegalArgumentException("Invalid list type. Must be 'MOVIE' or 'ACTOR'");
         }
@@ -89,18 +89,18 @@ public class ListService {
         }
 
         // Try ActorList
-        final Optional<ActorList> actorListOpt = actorListRepository.findById(listId);
+        final Optional<PersonList> actorListOpt = personListRepository.findById(listId);
         if (actorListOpt.isPresent()) {
-            final ActorList actorList = actorListOpt.get();
-            if (!actorList.getUser().getId().equals(userId)) {
+            final PersonList personList = actorListOpt.get();
+            if (!personList.getUser().getId().equals(userId)) {
                 throw new RuntimeException("User doesn't have access to this list");
             }
 
-            final Actor actor = actorRepository.findById(itemId)
+            final Person person = personRepository.findById(itemId)
                     .orElseThrow(() -> new RuntimeException("Actor not found"));
 
-            actorList.getActors().add(actor);
-            return actorListRepository.save(actorList);
+            personList.getPeople().add(person);
+            return personListRepository.save(personList);
         }
 
         throw new RuntimeException("List not found");
@@ -121,15 +121,15 @@ public class ListService {
         }
 
         // Try ActorList
-        final Optional<ActorList> actorListOpt = actorListRepository.findById(listId);
+        final Optional<PersonList> actorListOpt = personListRepository.findById(listId);
         if (actorListOpt.isPresent()) {
-            final ActorList actorList = actorListOpt.get();
-            if (!actorList.getUser().getId().equals(userId)) {
+            final PersonList personList = actorListOpt.get();
+            if (!personList.getUser().getId().equals(userId)) {
                 throw new RuntimeException("User doesn't have access to this list");
             }
 
-            actorList.getActors().removeIf(actor -> actor.getId() == itemId);
-            return actorListRepository.save(actorList);
+            personList.getPeople().removeIf(actor -> actor.getId() == itemId);
+            return personListRepository.save(personList);
         }
 
         throw new RuntimeException("List not found");
@@ -149,14 +149,14 @@ public class ListService {
         }
 
         // Try ActorList
-        final Optional<ActorList> actorListOpt = actorListRepository.findById(listId);
+        final Optional<PersonList> actorListOpt = personListRepository.findById(listId);
         if (actorListOpt.isPresent()) {
-            final ActorList actorList = actorListOpt.get();
-            if (!actorList.getUser().getId().equals(userId)) {
+            final PersonList personList = actorListOpt.get();
+            if (!personList.getUser().getId().equals(userId)) {
                 throw new RuntimeException("User doesn't have access to this list");
             }
-            actorList.setName(request.getName());
-            return actorListRepository.save(actorList);
+            personList.setName(request.getName());
+            return personListRepository.save(personList);
         }
 
         throw new RuntimeException("List not found");
@@ -176,13 +176,13 @@ public class ListService {
         }
 
         // Try ActorList
-        final Optional<ActorList> actorListOpt = actorListRepository.findById(listId);
+        final Optional<PersonList> actorListOpt = personListRepository.findById(listId);
         if (actorListOpt.isPresent()) {
-            final ActorList actorList = actorListOpt.get();
-            if (!actorList.getUser().getId().equals(userId)) {
+            final PersonList personList = actorListOpt.get();
+            if (!personList.getUser().getId().equals(userId)) {
                 throw new RuntimeException("User doesn't have access to this list");
             }
-            actorListRepository.deleteById(listId);
+            personListRepository.deleteById(listId);
             return;
         }
 

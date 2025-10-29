@@ -1,15 +1,12 @@
 package com.sabianrobi.frameshelf.entity.response;
 
-import com.sabianrobi.frameshelf.entity.Movie;
+import com.sabianrobi.frameshelf.entity.MovieBase;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true)
-public class MovieResponse extends Movie {
+public class SearchMoviesResponse extends MovieBase {
 }
-
-
-

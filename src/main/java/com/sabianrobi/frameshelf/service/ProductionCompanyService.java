@@ -1,6 +1,6 @@
 package com.sabianrobi.frameshelf.service;
 
-import com.sabianrobi.frameshelf.entity.ProductionCompany;
+import com.sabianrobi.frameshelf.entity.movie.ProductionCompany;
 import com.sabianrobi.frameshelf.repository.ProductionCompanyRepository;
 import info.movito.themoviedbapi.model.core.IdElement;
 import org.springframework.beans.factory.annotation.Autowired;

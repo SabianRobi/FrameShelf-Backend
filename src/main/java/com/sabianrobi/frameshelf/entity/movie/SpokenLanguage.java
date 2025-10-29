@@ -1,4 +1,4 @@
-package com.sabianrobi.frameshelf.entity;
+package com.sabianrobi.frameshelf.entity.movie;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,9 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Genre {
+public class SpokenLanguage {
     @Id
-    int id;
+    String iso6391;
 
     String name;
+    String englishName;
 }

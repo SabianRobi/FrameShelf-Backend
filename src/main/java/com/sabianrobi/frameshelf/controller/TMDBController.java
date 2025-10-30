@@ -54,6 +54,8 @@ public class TMDBController {
         }
     }
 
+    // ----- PEOPLE -----
+
     @GetMapping("/people/search")
     public ResponseEntity<Page<SearchPeopleResponse>> searchPeople(
             final @RequestParam(name = "query") String query,

@@ -12,7 +12,7 @@
     <artifactId>frameshelf</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>FrameShelf</name>
-    <description>A library for watched film and favourite actors.</description>
+    <description>Track watched movies and save people you like to see in films.</description>
     <url/>
     <licenses>
         <license/>

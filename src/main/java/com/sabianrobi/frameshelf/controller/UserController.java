@@ -32,6 +32,7 @@ public class UserController {
                     .orElse(ResponseEntity.notFound().build());
         } catch (final IllegalArgumentException e) {
             // Invalid UUID format
+            System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

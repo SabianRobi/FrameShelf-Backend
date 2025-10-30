@@ -16,5 +16,5 @@ public class CreateListRequest {
     private String name;
 
     @NotNull
-    private String type; // "MOVIE" or "ACTOR"
+    private String type; // "MOVIE" or "PERSON"
 }

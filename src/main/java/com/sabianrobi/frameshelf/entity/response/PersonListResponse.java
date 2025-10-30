@@ -26,7 +26,7 @@ public class PersonListResponse extends ListResponse {
      * @param personMapper The ActorMapper to use for conversion
      * @return The ActorListResponse
      */
-    public static PersonListResponse fromActorList(PersonList personList, PersonMapper personMapper) {
+    public static PersonListResponse fromPersonList(PersonList personList, PersonMapper personMapper) {
         if (personList == null) {
             return null;
         }

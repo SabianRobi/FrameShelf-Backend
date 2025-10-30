@@ -60,14 +60,14 @@ public class ListService {
                     .user(user)
                     .build();
             return movieListRepository.save(movieList);
-        } else if ("ACTOR".equalsIgnoreCase(type)) {
+        } else if ("PERSON".equalsIgnoreCase(type)) {
             final PersonList personList = PersonList.builder()
                     .name(name)
                     .user(user)
                     .build();
             return personListRepository.save(personList);
         } else {
-            throw new IllegalArgumentException("Invalid list type. Must be 'MOVIE' or 'ACTOR'");
+            throw new IllegalArgumentException("Invalid list type. Must be 'MOVIE' or 'PERSON'");
         }
     }
 

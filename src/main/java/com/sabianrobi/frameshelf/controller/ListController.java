@@ -44,8 +44,10 @@ public class ListController {
 
             return ResponseEntity.ok(listResponses);
         } catch (final IllegalArgumentException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -62,8 +64,10 @@ public class ListController {
             return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
 
         } catch (final IllegalArgumentException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -85,8 +89,10 @@ public class ListController {
             final List list = listService.createList(user, request.getName(), request.getType());
             return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -110,8 +116,10 @@ public class ListController {
             final List updatedList = listService.addItemToList(listUuid, request.getItemId(), user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -135,8 +143,10 @@ public class ListController {
             final List updatedList = listService.removeItemFromList(listUuid, itemId, user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -160,8 +170,10 @@ public class ListController {
             final List updatedList = listService.updateList(listUuid, request, user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -184,8 +196,10 @@ public class ListController {
             listService.deleteList(listUuid, user.getId());
             return ResponseEntity.noContent().build();
         } catch (final IllegalArgumentException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

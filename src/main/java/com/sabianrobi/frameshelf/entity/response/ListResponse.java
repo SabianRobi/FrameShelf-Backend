@@ -39,7 +39,7 @@ public abstract class ListResponse {
         if (list instanceof MovieList) {
             return MovieListResponse.fromMovieList((MovieList) list, movieMapper);
         } else if (list instanceof PersonList) {
-            return PersonListResponse.fromActorList((PersonList) list, personMapper);
+            return PersonListResponse.fromPersonList((PersonList) list, personMapper);
         }
 
         throw new IllegalArgumentException("Unknown list type: " + list.getClass().getName());

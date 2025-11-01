@@ -4,6 +4,7 @@ import com.sabianrobi.frameshelf.entity.List;
 import com.sabianrobi.frameshelf.entity.User;
 import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.CreateListRequest;
+import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
 import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
 import com.sabianrobi.frameshelf.entity.response.ListResponse;
 import com.sabianrobi.frameshelf.mapper.MovieMapper;
@@ -32,6 +33,8 @@ public class ListController {
     @Autowired
     private PersonMapper personMapper;
 
+    // ----- List Endpoints -----
+
     @GetMapping("/{userId}/lists")
     public ResponseEntity<java.util.List<ListResponse>> getUserLists(
             @PathVariable("userId") final String userId) {
@@ -44,26 +47,6 @@ public class ListController {
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(listResponses);
-        } catch (final IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (final RuntimeException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/{userId}/lists/{listId}")
-    public ResponseEntity<ListResponse> getListById(
-            @PathVariable("userId") final String userId,
-            @PathVariable("listId") final String listId) {
-        try {
-            final UUID userUuid = UUID.fromString(userId);
-            final UUID listUuid = UUID.fromString(listId);
-            final List list = listService.getListById(listUuid, userUuid);
-
-            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
-
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -98,60 +81,25 @@ public class ListController {
         }
     }
 
-    @PostMapping("/{userId}/lists/{listId}/items")
-    public ResponseEntity<ListResponse> addItemToList(
+    @GetMapping("/{userId}/lists/{listId}")
+    public ResponseEntity<ListResponse> getListById(
             @PathVariable("userId") final String userId,
-            @PathVariable("listId") final String listId,
-            @RequestBody final AddItemToListRequest request,
-            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+            @PathVariable("listId") final String listId) {
         try {
             final UUID userUuid = UUID.fromString(userId);
             final UUID listUuid = UUID.fromString(listId);
-            final User user = customOAuth2User.getUser();
+            final List list = listService.getListById(listUuid, userUuid);
 
-            // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userUuid)) {
-                return ResponseEntity.status(403).build();
-            }
+            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
 
-            final List updatedList = listService.addItemToList(listUuid, request, user.getId());
-            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (final RuntimeException e) {
             System.err.println(e.getMessage());
-            System.err.println(Arrays.toString(e.getStackTrace()));
             return ResponseEntity.notFound().build();
         }
     }
-
-//    @DeleteMapping("/{userId}/lists/{listId}/items/{itemId}")
-//    public ResponseEntity<ListResponse> removeItemFromList(
-//            @PathVariable("userId") final String userId,
-//            @PathVariable("listId") final String listId,
-//            @PathVariable("itemId") final Integer itemId,
-//            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
-//        try {
-//            final UUID userUuid = UUID.fromString(userId);
-//            final UUID listUuid = UUID.fromString(listId);
-//            final User user = customOAuth2User.getUser();
-//
-//            // Verify the authenticated user matches the path parameter
-//            if (!user.getId().equals(userUuid)) {
-//                return ResponseEntity.status(403).build();
-//            }
-//
-//            final List updatedList = listService.removeItemFromList(listUuid, itemId, user.getId());
-//            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
-//        } catch (final IllegalArgumentException e) {
-//            System.err.println(e.getMessage());
-//            return ResponseEntity.badRequest().build();
-//        } catch (final RuntimeException e) {
-//            System.err.println(e.getMessage());
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
 
     @PatchMapping("/{userId}/lists/{listId}")
     public ResponseEntity<ListResponse> updateList(
@@ -205,6 +153,89 @@ public class ListController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // ----- List Item Endpoints -----
+
+    @PostMapping("/{userId}/lists/{listId}/items")
+    public ResponseEntity<ListResponse> addItemToList(
+            @PathVariable("userId") final String userId,
+            @PathVariable("listId") final String listId,
+            @RequestBody final AddItemToListRequest request,
+            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        try {
+            final UUID userUuid = UUID.fromString(userId);
+            final UUID listUuid = UUID.fromString(listId);
+            final User user = customOAuth2User.getUser();
+
+            // Verify the authenticated user matches the path parameter
+            if (!user.getId().equals(userUuid)) {
+                return ResponseEntity.status(403).build();
+            }
+
+            final List updatedList = listService.addItemToList(listUuid, request, user.getId());
+            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
+        } catch (final IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (final RuntimeException e) {
+            System.err.println(e.getMessage());
+            System.err.println(Arrays.toString(e.getStackTrace()));
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{userId}/lists/{listId}/items/{itemId}")
+    public ResponseEntity<ListResponse> editItemInList(
+            @PathVariable("userId") final UUID userId,
+            @PathVariable("listId") final UUID listId,
+            @PathVariable("itemId") final UUID itemId,
+            @RequestBody final EditItemInListRequest request,
+            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        try {
+            final User user = customOAuth2User.getUser();
+
+            // Verify the authenticated user matches the path parameter
+            if (!user.getId().equals(userId)) {
+                return ResponseEntity.status(403).build();
+            }
+
+            final List updatedList = listService.editItemInList(listId, itemId, request, user.getId());
+            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
+        } catch (final IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (final RuntimeException e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+//    @DeleteMapping("/{userId}/lists/{listId}/items/{itemId}")
+//    public ResponseEntity<ListResponse> removeItemFromList(
+//            @PathVariable("userId") final String userId,
+//            @PathVariable("listId") final String listId,
+//            @PathVariable("itemId") final Integer itemId,
+//            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+//        try {
+//            final UUID userUuid = UUID.fromString(userId);
+//            final UUID listUuid = UUID.fromString(listId);
+//            final User user = customOAuth2User.getUser();
+//
+//            // Verify the authenticated user matches the path parameter
+//            if (!user.getId().equals(userUuid)) {
+//                return ResponseEntity.status(403).build();
+//            }
+//
+//            final List updatedList = listService.removeItemFromList(listUuid, itemId, user.getId());
+//            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
+//        } catch (final IllegalArgumentException e) {
+//            System.err.println(e.getMessage());
+//            return ResponseEntity.badRequest().build();
+//        } catch (final RuntimeException e) {
+//            System.err.println(e.getMessage());
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 
     // Add movie to list (+ watchedAt, watchedLanguage)
     // Edit movie in a list (watchedAt, watchedLanguage)

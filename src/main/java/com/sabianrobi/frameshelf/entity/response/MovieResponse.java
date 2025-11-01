@@ -10,6 +10,3 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public class MovieResponse extends Movie {
 }
-
-
-

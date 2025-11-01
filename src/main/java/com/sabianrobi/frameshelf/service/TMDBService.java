@@ -1,6 +1,5 @@
 package com.sabianrobi.frameshelf.service;
 
-import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchMoviesResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchPeopleResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchPersonResponse;
@@ -66,10 +65,8 @@ public class TMDBService {
         return new PageImpl<>(movieResults, pageable, searchResult.getTotalResults());
     }
 
-    public SearchMovieResponse searchMovie(final Integer movieId) throws TmdbException {
-        final MovieDb movieDb = tmdbApi.getMovies().getDetails(movieId, language, MovieAppendToResponse.CREDITS);
-
-        return tmdbMapper.mapTMDBMovieToSearchMovieResponse(movieDb);
+    public MovieDb searchMovie(final Integer movieId) throws TmdbException {
+        return tmdbApi.getMovies().getDetails(movieId, language, MovieAppendToResponse.CREDITS);
     }
 
     // ------------
@@ -92,7 +89,6 @@ public class TMDBService {
         return tmdbMapper.mapTMDBPersonToSearchPersonResponse(personDb);
     }
 
-    
     // Should be moved to MovieService, just the query to TMDB should remain here
 //    public Movie createMovie(final int movieId, final String watchedLanguage, final Date watchedAt) throws TmdbException {
 //        final TmdbMovies tmdbMovies = tmdbApi.getMovies();

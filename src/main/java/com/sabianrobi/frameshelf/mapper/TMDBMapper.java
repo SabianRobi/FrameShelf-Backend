@@ -1,10 +1,17 @@
 package com.sabianrobi.frameshelf.mapper;
 
+import com.sabianrobi.frameshelf.entity.Collection;
+import com.sabianrobi.frameshelf.entity.Movie;
+import com.sabianrobi.frameshelf.entity.movie.*;
 import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchMoviesResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchPeopleResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchPersonResponse;
+import info.movito.themoviedbapi.model.core.Language;
 import info.movito.themoviedbapi.model.core.popularperson.PopularPerson;
+import info.movito.themoviedbapi.model.movies.BelongsToCollection;
+import info.movito.themoviedbapi.model.movies.Cast;
+import info.movito.themoviedbapi.model.movies.Crew;
 import info.movito.themoviedbapi.model.movies.MovieDb;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +34,7 @@ public class TMDBMapper {
     }
 
     public SearchMovieResponse mapTMDBMovieToSearchMovieResponse(final MovieDb tmdbMovie) {
-        final List<SearchMovieResponse.CastMemberResponse> cast = tmdbMovie.getCredits().getCast().stream().map(c -> SearchMovieResponse.CastMemberResponse.builder()
+        final Set<CastMember> cast = tmdbMovie.getCredits().getCast().stream().map(c -> CastMember.builder()
                 .adult(c.getAdult())
                 .gender(c.getGender().toString())
                 .id(c.getId())
@@ -40,9 +47,9 @@ public class TMDBMapper {
                 .character(c.getCharacter())
                 .creditId(c.getCreditId())
                 .order(c.getOrder())
-                .build()).toList();
+                .build()).collect(Collectors.toSet());
 
-        final List<SearchMovieResponse.CrewMemberResponse> crew = tmdbMovie.getCredits().getCrew().stream().map(c -> SearchMovieResponse.CrewMemberResponse.builder()
+        final Set<CrewMember> crew = tmdbMovie.getCredits().getCrew().stream().map(c -> CrewMember.builder()
                 .adult(c.getAdult())
                 .gender(c.getGender().toString())
                 .id(c.getId())
@@ -54,9 +61,9 @@ public class TMDBMapper {
                 .creditId(c.getCreditId())
                 .department(c.getDepartment())
                 .job(c.getJob())
-                .build()).toList();
+                .build()).collect(Collectors.toSet());
 
-        final SearchMovieResponse.Credits credits = SearchMovieResponse.Credits.builder()
+        final Credits credits = Credits.builder()
                 .cast(cast)
                 .crew(crew)
                 .build();
@@ -195,7 +202,7 @@ public class TMDBMapper {
                 .voteAverage(c.getVoteAverage())
                 .voteCount(c.getVoteCount())
                 .build()).toList();
-        
+
         final SearchPersonResponse.TvCredits tvCredits = SearchPersonResponse.TvCredits.builder()
                 .cast(tvCastMembers)
                 .crew(tvCrewMembers)
@@ -218,6 +225,123 @@ public class TMDBMapper {
                 .profilePath(tmdbPerson.getProfilePath())
                 .movieCredits(movieCredits)
                 .tvCredits(tvCredits)
+                .build();
+    }
+
+    public Movie mapTMDBMovieToMovie(final MovieDb movieDb,
+                                     final Collection belongsToCollection,
+                                     final Set<Genre> genres,
+                                     final Set<ProductionCompany> productionCompanies,
+                                     final Set<ProductionCountry> productionCountries,
+                                     final Set<SpokenLanguage> spokenLanguages,
+                                     final Credits credits) {
+        return Movie.builder()
+                .adult(movieDb.getAdult())
+                .backdropPath(movieDb.getBackdropPath())
+                .belongsToCollection(belongsToCollection)
+                .budget(movieDb.getBudget())
+                .genres(genres)
+                .homepage(movieDb.getHomepage())
+                .id(movieDb.getId())
+                .imdbId(movieDb.getImdbID())
+//                .originalCountry(movieDb.getOriginalCountry())
+                .originalLanguage(movieDb.getOriginalLanguage())
+                .originalTitle(movieDb.getOriginalTitle())
+                .overview(movieDb.getOverview())
+                .popularity(movieDb.getPopularity())
+                .posterPath(movieDb.getPosterPath())
+                .productionCompanies(productionCompanies)
+                .productionCountries(productionCountries)
+                .releaseDate(movieDb.getReleaseDate())
+                .revenue(movieDb.getRevenue())
+                .runtime(movieDb.getRuntime())
+                .spokenLanguages(spokenLanguages)
+                .status(movieDb.getStatus())
+                .tagline(movieDb.getTagline())
+                .title(movieDb.getTitle())
+                .video(movieDb.getVideo())
+                .voteAverage(movieDb.getVoteAverage())
+                .voteCount(movieDb.getVoteCount())
+                .credits(credits)
+                .build();
+    }
+
+    public Collection mapTMDBCollectionToCollection(final BelongsToCollection belongsToCollection) {
+        if (belongsToCollection == null) {
+            return null;
+        }
+
+        return Collection.builder()
+                .id(belongsToCollection.getId())
+                .name(belongsToCollection.getName())
+                .posterPath(belongsToCollection.getPosterPath())
+                .backdropPath(belongsToCollection.getBackdropPath())
+                .build();
+    }
+
+    public Genre mapTMDBGenreToGenre(final info.movito.themoviedbapi.model.core.Genre genre) {
+        return Genre.builder()
+                .id(genre.getId())
+                .name(genre.getName())
+                .build();
+    }
+
+    public ProductionCompany mapTMDBProductionCompanyToProductionCompany(
+            final info.movito.themoviedbapi.model.core.ProductionCompany company) {
+        return ProductionCompany.builder()
+                .id(company.getId())
+                .logoPath(company.getLogoPath())
+                .name(company.getName())
+                .originCountry(company.getOriginCountry())
+                .build();
+    }
+
+    public ProductionCountry mapTMDBProductionCountryToProductionCountry(
+            final info.movito.themoviedbapi.model.core.ProductionCountry country) {
+        return ProductionCountry.builder()
+                .iso31661(country.getIsoCode())
+                .name(country.getName())
+                .build();
+    }
+
+    public SpokenLanguage mapTMDBSpokenLanguageToSpokenLanguage(final Language language) {
+        return SpokenLanguage.builder()
+                .iso6391(language.getIso6391())
+                .name(language.getName())
+                .englishName(language.getEnglishName())
+                .build();
+    }
+
+    public CastMember mapTMDBCastMemberToCastMember(final Cast cast) {
+        return CastMember.builder()
+                .adult(cast.getAdult())
+                .gender(cast.getGender().toString())
+                .id(cast.getId())
+                .knownForDepartment(cast.getKnownForDepartment())
+                .name(cast.getName())
+                .originalName(cast.getOriginalName())
+                .popularity(cast.getPopularity())
+                .profilePath(cast.getProfilePath())
+                .castId(cast.getCastId())
+                .character(cast.getCharacter())
+                .creditId(cast.getCreditId())
+                .order(cast.getOrder())
+                .build();
+    }
+
+    public CrewMember mapTMDBCrewMemberToCrewMember(final Crew crew) {
+        return CrewMember.builder()
+                .adult(crew.getAdult())
+                .gender(crew.getGender().toString())
+                .id(crew.getId())
+                .knownForDepartment(crew.getKnownForDepartment())
+                .name(crew.getName())
+                .originalName(crew.getOriginalName())
+                .popularity(crew.getPopularity())
+                .profilePath(crew.getProfilePath())
+                .creditId(crew.getCreditId())
+                .department(crew.getDepartment())
+                .job(crew.getJob())
                 .build();
     }
 }

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MovieListResponse extends ListResponse {
-    private Set<MovieResponse> movies;
+    private Set<MovieInListResponse> movies;
 
     /**
      * Create a MovieListResponse from a MovieList entity
@@ -35,10 +35,11 @@ public class MovieListResponse extends ListResponse {
                 .id(movieList.getId())
                 .name(movieList.getName())
                 .userId(movieList.getUser() != null ? movieList.getUser().getId() : null)
-                .movies(movieList.getMovies() != null && movieMapper != null ?
-                        movieList.getMovies().stream()
-                                .map(movieMapper::mapMovieToMovieResponse)
-                                .collect(Collectors.toSet()) : null)
+                .movies(movieList.getMovies() != null && movieMapper != null
+                        ? movieList.getMovies()
+                        .stream()
+                        .map(movieMapper::mapMovieInListToMovieInListResponse).collect(Collectors.toSet())
+                        : null)
                 .build();
     }
 }

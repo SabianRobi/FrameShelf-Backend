@@ -1,16 +1,10 @@
 package com.sabianrobi.frameshelf.entity;
 
-import com.sabianrobi.frameshelf.entity.movie.Genre;
-import com.sabianrobi.frameshelf.entity.movie.ProductionCompany;
-import com.sabianrobi.frameshelf.entity.movie.ProductionCountry;
-import com.sabianrobi.frameshelf.entity.movie.SpokenLanguage;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
+import com.sabianrobi.frameshelf.entity.movie.*;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -21,8 +15,7 @@ import java.util.Set;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class Movie extends MovieBase {
+public class Movie {
     boolean adult;
     String backdropPath;
 
@@ -36,13 +29,19 @@ public class Movie extends MovieBase {
 
     String homepage;
 
+    @Id
+    int id;
+
     String imdbId;
+    String[] originalCountry;
     String originalLanguage;
+    String originalTitle;
 
     @Size(max = 1000)
     String overview;
 
     double popularity;
+    String posterPath;
 
     @ManyToMany
     Set<ProductionCompany> productionCompanies;
@@ -50,6 +49,7 @@ public class Movie extends MovieBase {
     @ManyToMany
     Set<ProductionCountry> productionCountries;
 
+    String releaseDate;
     long revenue;
     int runtime;
 
@@ -58,9 +58,11 @@ public class Movie extends MovieBase {
 
     String status;
     String tagline;
+    String title;
     boolean video;
     double voteAverage;
     int voteCount;
 
-    // Credits
+    @OneToOne
+    Credits credits;
 }

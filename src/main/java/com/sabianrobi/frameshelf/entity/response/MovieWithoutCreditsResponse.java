@@ -1,28 +1,27 @@
 package com.sabianrobi.frameshelf.entity.response;
 
 import com.sabianrobi.frameshelf.entity.Collection;
-import com.sabianrobi.frameshelf.entity.movie.Credits;
+import com.sabianrobi.frameshelf.entity.movie.Genre;
 import com.sabianrobi.frameshelf.entity.movie.ProductionCompany;
 import com.sabianrobi.frameshelf.entity.movie.ProductionCountry;
 import com.sabianrobi.frameshelf.entity.movie.SpokenLanguage;
-import info.movito.themoviedbapi.model.core.Genre;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
 import java.util.Set;
 
 @Data
 @Builder
-public class SearchMovieResponse {
+public class MovieWithoutCreditsResponse {
     boolean adult;
     String backdropPath;
     Collection belongsToCollection;
     int budget;
-    List<Genre> genres;
+    Set<Genre> genres;
     String homepage;
     int id;
     String imdbId;
+    String[] originalCountry;
     String originalLanguage;
     String originalTitle;
     String overview;
@@ -40,5 +39,4 @@ public class SearchMovieResponse {
     boolean video;
     double voteAverage;
     int voteCount;
-    Credits credits;
 }

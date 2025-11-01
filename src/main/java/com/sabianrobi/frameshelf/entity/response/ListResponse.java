@@ -29,9 +29,9 @@ public abstract class ListResponse {
      * @param personMapper The ActorMapper to use for conversion
      * @return The ListResponse
      */
-    public static ListResponse fromList(List list,
-                                        MovieMapper movieMapper,
-                                        PersonMapper personMapper) {
+    public static ListResponse fromList(final List list,
+                                        final MovieMapper movieMapper,
+                                        final PersonMapper personMapper) {
         if (list == null) {
             return null;
         }

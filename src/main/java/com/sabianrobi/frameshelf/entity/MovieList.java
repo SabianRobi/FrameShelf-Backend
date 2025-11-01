@@ -1,25 +1,24 @@
 package com.sabianrobi.frameshelf.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.OneToMany;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @DiscriminatorValue("MOVIE")
 public class MovieList extends List {
-    @ManyToMany
-    private Set<Movie> movies = new HashSet<>();
+    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<MovieInList> movies = new HashSet<>();
 }

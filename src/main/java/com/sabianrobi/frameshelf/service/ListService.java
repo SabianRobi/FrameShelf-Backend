@@ -74,6 +74,8 @@ public class ListService {
     @Autowired
     private MovieInListRepository movieInListRepository;
 
+    // ----- List operations -----
+
     public java.util.List<List> getUserLists(final UUID userId) {
         final java.util.List<List> allLists = new ArrayList<>();
         allLists.addAll(movieListRepository.findByUserId(userId));
@@ -116,6 +118,62 @@ public class ListService {
             throw new IllegalArgumentException("Invalid list type. Must be 'MOVIE' or 'PERSON'");
         }
     }
+
+    @Transactional
+    public List updateList(final UUID listId, final UpdateListRequest request, final UUID userId) {
+        // Try MovieList first
+        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
+        if (movieListOpt.isPresent()) {
+            final MovieList movieList = movieListOpt.get();
+            if (!movieList.getUser().getId().equals(userId)) {
+                throw new RuntimeException("User doesn't have access to this list");
+            }
+            movieList.setName(request.getName());
+            return movieListRepository.save(movieList);
+        }
+
+        // Try ActorList
+        final Optional<PersonList> actorListOpt = personListRepository.findById(listId);
+        if (actorListOpt.isPresent()) {
+            final PersonList personList = actorListOpt.get();
+            if (!personList.getUser().getId().equals(userId)) {
+                throw new RuntimeException("User doesn't have access to this list");
+            }
+            personList.setName(request.getName());
+            return personListRepository.save(personList);
+        }
+
+        throw new RuntimeException("List not found");
+    }
+
+    @Transactional
+    public void deleteList(final UUID listId, final UUID userId) {
+        // Try MovieList first
+        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
+        if (movieListOpt.isPresent()) {
+            final MovieList movieList = movieListOpt.get();
+            if (!movieList.getUser().getId().equals(userId)) {
+                throw new RuntimeException("User doesn't have access to this list");
+            }
+            movieListRepository.deleteById(listId);
+            return;
+        }
+
+        // Try ActorList
+        final Optional<PersonList> actorListOpt = personListRepository.findById(listId);
+        if (actorListOpt.isPresent()) {
+            final PersonList personList = actorListOpt.get();
+            if (!personList.getUser().getId().equals(userId)) {
+                throw new RuntimeException("User doesn't have access to this list");
+            }
+            personListRepository.deleteById(listId);
+            return;
+        }
+
+        throw new RuntimeException("List not found");
+    }
+
+    // ----- List item operations -----
 
     @Transactional
     public List addItemToList(final UUID listId, final AddItemToListRequest request, final UUID userId) {
@@ -262,88 +320,7 @@ public class ListService {
         throw new RuntimeException("List not found");
     }
 
-    //    @Transactional
-//    public List removeItemFromList(final UUID listId, final Integer itemId, final UUID userId) {
-//        // Try MovieList first
-//        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
-//        if (movieListOpt.isPresent()) {
-//            final MovieList movieList = movieListOpt.get();
-//            if (!movieList.getUser().getId().equals(userId)) {
-//                throw new RuntimeException("User doesn't have access to this list");
-//            }
-//
-//            movieList.getMovies().removeIf(movie -> movie.getId() == itemId);
-//            return movieListRepository.save(movieList);
-//        }
-//
-//        // Try ActorList
-//        final Optional<PersonList> actorListOpt = personListRepository.findById(listId);
-//        if (actorListOpt.isPresent()) {
-//            final PersonList personList = actorListOpt.get();
-//            if (!personList.getUser().getId().equals(userId)) {
-//                throw new RuntimeException("User doesn't have access to this list");
-//            }
-//
-//            personList.getPeople().removeIf(actor -> actor.getId() == itemId);
-//            return personListRepository.save(personList);
-//        }
-//
-//        throw new RuntimeException("List not found");
-//    }
     @Transactional
-    public List updateList(final UUID listId, final UpdateListRequest request, final UUID userId) {
-        // Try MovieList first
-        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
-        if (movieListOpt.isPresent()) {
-            final MovieList movieList = movieListOpt.get();
-            if (!movieList.getUser().getId().equals(userId)) {
-                throw new RuntimeException("User doesn't have access to this list");
-            }
-            movieList.setName(request.getName());
-            return movieListRepository.save(movieList);
-        }
-
-        // Try ActorList
-        final Optional<PersonList> actorListOpt = personListRepository.findById(listId);
-        if (actorListOpt.isPresent()) {
-            final PersonList personList = actorListOpt.get();
-            if (!personList.getUser().getId().equals(userId)) {
-                throw new RuntimeException("User doesn't have access to this list");
-            }
-            personList.setName(request.getName());
-            return personListRepository.save(personList);
-        }
-
-        throw new RuntimeException("List not found");
-    }
-
-    @Transactional
-    public void deleteList(final UUID listId, final UUID userId) {
-        // Try MovieList first
-        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
-        if (movieListOpt.isPresent()) {
-            final MovieList movieList = movieListOpt.get();
-            if (!movieList.getUser().getId().equals(userId)) {
-                throw new RuntimeException("User doesn't have access to this list");
-            }
-            movieListRepository.deleteById(listId);
-            return;
-        }
-
-        // Try ActorList
-        final Optional<PersonList> actorListOpt = personListRepository.findById(listId);
-        if (actorListOpt.isPresent()) {
-            final PersonList personList = actorListOpt.get();
-            if (!personList.getUser().getId().equals(userId)) {
-                throw new RuntimeException("User doesn't have access to this list");
-            }
-            personListRepository.deleteById(listId);
-            return;
-        }
-
-        throw new RuntimeException("List not found");
-    }
-
     public List editItemInList(final UUID listId,
                                final UUID itemId,
                                final EditItemInListRequest request,
@@ -389,5 +366,34 @@ public class ListService {
         // Fetch the updated list to ensure it contains the newly updated item
         return movieListRepository.findById(listId)
                 .orElseThrow(() -> new RuntimeException("List not found after update"));
+    }
+
+    @Transactional
+    public List removeItemFromList(final UUID listId, final UUID itemId, final UUID userId) {
+        // Verify list ownership
+        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
+        final MovieList list = movieListOpt.orElse(null);
+
+        assert list != null;
+        if (!list.getUser().getId().equals(userId)) {
+            throw new RuntimeException("User doesn't have access to this list");
+        }
+
+        // Verify item exists in list
+        if (list.getMovies().stream().noneMatch(
+                movieInList -> movieInList.getId().equals(itemId)
+        )) {
+            throw new RuntimeException("Item not found in list");
+        }
+
+        // Fetch the MovieInList entity
+        final MovieInList movieInList = movieInListRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found in list"));
+
+        // Remove the item from the list
+        list.getMovies().remove(movieInList);
+        movieInListRepository.delete(movieInList);
+
+        return movieListRepository.save(list);
     }
 }

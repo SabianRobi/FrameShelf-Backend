@@ -14,20 +14,18 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class MovieInList {
+public class PersonInList {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @EqualsAndHashCode.Include
     private UUID id;
 
     @ManyToOne
-    private Movie movie;
+    private Person person;
 
     @ManyToOne
-    private MovieList list;
+    private PersonList list;
 
     private LocalDateTime addedAt;
     private String notes;
-    private LocalDateTime watchedAt;
-    // watchedLanguage
 }

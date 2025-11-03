@@ -1,12 +1,10 @@
 package com.sabianrobi.frameshelf.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.OneToMany;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
@@ -20,7 +18,8 @@ import java.util.Set;
 @Entity
 @DiscriminatorValue("PERSON")
 public class PersonList extends List {
-    @ManyToMany
-    private Set<Person> people = new HashSet<>();
+    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<PersonInList> people = new HashSet<>();
 }
 

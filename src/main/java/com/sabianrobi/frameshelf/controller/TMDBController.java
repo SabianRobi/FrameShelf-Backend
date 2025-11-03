@@ -8,6 +8,7 @@ import com.sabianrobi.frameshelf.mapper.TMDBMapper;
 import com.sabianrobi.frameshelf.service.TMDBService;
 import com.sabianrobi.frameshelf.service.UserService;
 import info.movito.themoviedbapi.model.movies.MovieDb;
+import info.movito.themoviedbapi.model.people.PersonDb;
 import info.movito.themoviedbapi.tools.TmdbException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,7 +51,7 @@ public class TMDBController {
         try {
             final MovieDb movieDb = tmdbService.searchMovie(movieId);
             final SearchMovieResponse response = tmdbMapper.mapTMDBMovieToSearchMovieResponse(movieDb);
-            
+
             return ResponseEntity.ok(response);
         } catch (final TmdbException e) {
             System.err.println(e.getMessage());
@@ -83,8 +84,10 @@ public class TMDBController {
     @GetMapping("/people/search/{personId}")
     public ResponseEntity<SearchPersonResponse> searchPerson(final @PathVariable("personId") Integer personId) {
         try {
-            final SearchPersonResponse result = tmdbService.searchPerson(personId);
-            return ResponseEntity.ok(result);
+            final PersonDb personDb = tmdbService.searchPerson(personId);
+            final SearchPersonResponse response = tmdbMapper.mapTMDBPersonToSearchPersonResponse(personDb);
+
+            return ResponseEntity.ok(response);
         } catch (final TmdbException e) {
             System.err.println(e.getMessage());
             return ResponseEntity.status(503).build();

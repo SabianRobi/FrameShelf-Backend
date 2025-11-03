@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -16,53 +17,56 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Movie {
-    boolean adult;
-    String backdropPath;
+    private boolean adult;
+    private String backdropPath;
 
     @ManyToOne
-    Collection belongsToCollection;
+    private Collection belongsToCollection;
 
-    int budget;
+    private int budget;
 
     @ManyToMany
-    Set<Genre> genres;
+    private Set<Genre> genres;
 
-    String homepage;
+    private String homepage;
 
     @Id
-    int id;
+    private int id;
 
-    String imdbId;
-    String[] originalCountry;
-    String originalLanguage;
-    String originalTitle;
+    private String imdbId;
+
+    @ElementCollection
+    private List<String> originalCountry;
+
+    private String originalLanguage;
+    private String originalTitle;
 
     @Size(max = 1000)
-    String overview;
+    private String overview;
 
-    double popularity;
-    String posterPath;
-
-    @ManyToMany
-    Set<ProductionCompany> productionCompanies;
+    private double popularity;
+    private String posterPath;
 
     @ManyToMany
-    Set<ProductionCountry> productionCountries;
-
-    String releaseDate;
-    long revenue;
-    int runtime;
+    private Set<ProductionCompany> productionCompanies;
 
     @ManyToMany
-    Set<SpokenLanguage> spokenLanguages;
+    private Set<ProductionCountry> productionCountries;
 
-    String status;
-    String tagline;
-    String title;
-    boolean video;
-    double voteAverage;
-    int voteCount;
+    private String releaseDate;
+    private long revenue;
+    private int runtime;
+
+    @ManyToMany
+    private Set<SpokenLanguage> spokenLanguages;
+
+    private String status;
+    private String tagline;
+    private String title;
+    private boolean video;
+    private double voteAverage;
+    private int voteCount;
 
     @OneToOne
-    Credits credits;
+    private Credits credits;
 }

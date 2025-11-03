@@ -2,7 +2,6 @@ package com.sabianrobi.frameshelf.service;
 
 import com.sabianrobi.frameshelf.entity.response.SearchMoviesResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchPeopleResponse;
-import com.sabianrobi.frameshelf.entity.response.SearchPersonResponse;
 import com.sabianrobi.frameshelf.mapper.TMDBMapper;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbSearch;
@@ -83,10 +82,8 @@ public class TMDBService {
         return new PageImpl<>(movieResults, pageable, searchResult.getTotalResults());
     }
 
-    public SearchPersonResponse searchPerson(final Integer personId) throws TmdbException {
-        final PersonDb personDb = tmdbApi.getPeople().getDetails(personId, language, PersonAppendToResponse.MOVIE_CREDITS, PersonAppendToResponse.TV_CREDITS);
-
-        return tmdbMapper.mapTMDBPersonToSearchPersonResponse(personDb);
+    public PersonDb searchPerson(final Integer personId) throws TmdbException {
+        return tmdbApi.getPeople().getDetails(personId, language, PersonAppendToResponse.MOVIE_CREDITS, PersonAppendToResponse.TV_CREDITS);
     }
 
     // Should be moved to MovieService, just the query to TMDB should remain here

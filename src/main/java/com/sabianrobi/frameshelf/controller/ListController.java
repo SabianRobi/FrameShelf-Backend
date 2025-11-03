@@ -37,10 +37,16 @@ public class ListController {
 
     @GetMapping("/{userId}/lists")
     public ResponseEntity<java.util.List<ListResponse>> getUserLists(
-            @PathVariable("userId") final String userId) {
+            @PathVariable("userId") final UUID userId,
+            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         try {
-            final UUID userUuid = UUID.fromString(userId);
-            final java.util.List<List> lists = listService.getUserLists(userUuid);
+            // Verify the authenticated user matches the path parameter
+            final User user = customOAuth2User.getUser();
+            if (!user.getId().equals(userId)) {
+                return ResponseEntity.status(403).build();
+            }
+
+            final java.util.List<List> lists = listService.getUserLists(userId);
 
             final java.util.List<ListResponse> listResponses = lists.stream()
                     .map(list -> ListResponse.fromList(list, movieMapper, personMapper))
@@ -58,15 +64,14 @@ public class ListController {
 
     @PostMapping("/{userId}/lists")
     public ResponseEntity<ListResponse> createList(
-            @PathVariable("userId") final String userId,
+            @PathVariable("userId") final UUID userId,
             @RequestBody final CreateListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         try {
-            final UUID userUuid = UUID.fromString(userId);
             final User user = customOAuth2User.getUser();
 
             // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userUuid)) {
+            if (!user.getId().equals(userId)) {
                 return ResponseEntity.status(403).build();
             }
 
@@ -83,15 +88,19 @@ public class ListController {
 
     @GetMapping("/{userId}/lists/{listId}")
     public ResponseEntity<ListResponse> getListById(
-            @PathVariable("userId") final String userId,
-            @PathVariable("listId") final String listId) {
+            @PathVariable("userId") final UUID userId,
+            @PathVariable("listId") final UUID listId,
+            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         try {
-            final UUID userUuid = UUID.fromString(userId);
-            final UUID listUuid = UUID.fromString(listId);
-            final List list = listService.getListById(listUuid, userUuid);
+
+            final User user = customOAuth2User.getUser();
+            if (!user.getId().equals(userId)) {
+                return ResponseEntity.status(403).build();
+            }
+
+            final List list = listService.getListById(listId, userId);
 
             return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
-
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -103,21 +112,19 @@ public class ListController {
 
     @PatchMapping("/{userId}/lists/{listId}")
     public ResponseEntity<ListResponse> updateList(
-            @PathVariable("userId") final String userId,
-            @PathVariable("listId") final String listId,
+            @PathVariable("userId") final UUID userId,
+            @PathVariable("listId") final UUID listId,
             @RequestBody final UpdateListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         try {
-            final UUID userUuid = UUID.fromString(userId);
-            final UUID listUuid = UUID.fromString(listId);
             final User user = customOAuth2User.getUser();
 
             // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userUuid)) {
+            if (!user.getId().equals(userId)) {
                 return ResponseEntity.status(403).build();
             }
 
-            final List updatedList = listService.updateList(listUuid, request, user.getId());
+            final List updatedList = listService.updateList(listId, request, user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
@@ -130,20 +137,18 @@ public class ListController {
 
     @DeleteMapping("/{userId}/lists/{listId}")
     public ResponseEntity<Void> deleteList(
-            @PathVariable("userId") final String userId,
-            @PathVariable("listId") final String listId,
+            @PathVariable("userId") final UUID userId,
+            @PathVariable("listId") final UUID listId,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         try {
-            final UUID userUuid = UUID.fromString(userId);
-            final UUID listUuid = UUID.fromString(listId);
             final User user = customOAuth2User.getUser();
 
             // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userUuid)) {
+            if (!user.getId().equals(userId)) {
                 return ResponseEntity.status(403).build();
             }
 
-            listService.deleteList(listUuid, user.getId());
+            listService.deleteList(listId, user.getId());
             return ResponseEntity.noContent().build();
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
@@ -158,21 +163,19 @@ public class ListController {
 
     @PostMapping("/{userId}/lists/{listId}/items")
     public ResponseEntity<ListResponse> addItemToList(
-            @PathVariable("userId") final String userId,
-            @PathVariable("listId") final String listId,
+            @PathVariable("userId") final UUID userId,
+            @PathVariable("listId") final UUID listId,
             @RequestBody final AddItemToListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         try {
-            final UUID userUuid = UUID.fromString(userId);
-            final UUID listUuid = UUID.fromString(listId);
             final User user = customOAuth2User.getUser();
 
             // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userUuid)) {
+            if (!user.getId().equals(userId)) {
                 return ResponseEntity.status(403).build();
             }
 
-            final List updatedList = listService.addItemToList(listUuid, request, user.getId());
+            final List updatedList = listService.addItemToList(listId, request, user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
@@ -234,8 +237,4 @@ public class ListController {
             return ResponseEntity.notFound().build();
         }
     }
-
-    // Add movie to list (+ watchedAt, watchedLanguage)
-    // Edit movie in a list (watchedAt, watchedLanguage)
-    // Remove movie from list
 }

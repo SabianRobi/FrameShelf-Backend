@@ -15,22 +15,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CastMember {
     private boolean adult;
-    private String gender; // int?
-
-    private int id; // TMDB person ID
-    private String knownForDepartment;
-    private String name;
-    private String originalName;
-    private double popularity;
-    private String profilePath;
     private int castId;
+
+    @Id
+    private String creditId;
 
     @Column(name = "`character`")
     private String character;
 
-    @Id
-    private String creditId; // Use creditId as primary key (unique per role)
+    private int gender;
+    private int id; // TMDB person ID
+    private String knownForDepartment;
+    private String name;
 
     @Column(name = "`order`")
     private int order;
+
+    private String originalName;
+    private double popularity;
+    private String profilePath;
 }

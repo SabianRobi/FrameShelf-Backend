@@ -2,7 +2,9 @@ package com.sabianrobi.frameshelf.mapper;
 
 import com.sabianrobi.frameshelf.entity.Collection;
 import com.sabianrobi.frameshelf.entity.Movie;
+import com.sabianrobi.frameshelf.entity.Person;
 import com.sabianrobi.frameshelf.entity.movie.*;
+import com.sabianrobi.frameshelf.entity.person.*;
 import com.sabianrobi.frameshelf.entity.response.SearchMovieResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchMoviesResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchPeopleResponse;
@@ -13,6 +15,11 @@ import info.movito.themoviedbapi.model.movies.BelongsToCollection;
 import info.movito.themoviedbapi.model.movies.Cast;
 import info.movito.themoviedbapi.model.movies.Crew;
 import info.movito.themoviedbapi.model.movies.MovieDb;
+import info.movito.themoviedbapi.model.people.PersonDb;
+import info.movito.themoviedbapi.model.people.credits.MovieCast;
+import info.movito.themoviedbapi.model.people.credits.MovieCrew;
+import info.movito.themoviedbapi.model.people.credits.TvCast;
+import info.movito.themoviedbapi.model.people.credits.TvCrew;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,7 +43,7 @@ public class TMDBMapper {
     public SearchMovieResponse mapTMDBMovieToSearchMovieResponse(final MovieDb tmdbMovie) {
         final Set<CastMember> cast = tmdbMovie.getCredits().getCast().stream().map(c -> CastMember.builder()
                 .adult(c.getAdult())
-                .gender(c.getGender().toString())
+                .gender(c.getGender().ordinal())
                 .id(c.getId())
                 .knownForDepartment(c.getKnownForDepartment())
                 .name(c.getName())
@@ -315,7 +322,7 @@ public class TMDBMapper {
     public CastMember mapTMDBCastMemberToCastMember(final Cast cast) {
         return CastMember.builder()
                 .adult(cast.getAdult())
-                .gender(cast.getGender().toString())
+                .gender(cast.getGender().ordinal())
                 .id(cast.getId())
                 .knownForDepartment(cast.getKnownForDepartment())
                 .name(cast.getName())
@@ -342,6 +349,120 @@ public class TMDBMapper {
                 .creditId(crew.getCreditId())
                 .department(crew.getDepartment())
                 .job(crew.getJob())
+                .build();
+    }
+
+    public MovieCastMember mapTMDBMovieCastMemberToMovieCastMember(final MovieCast tmdbCastMember) {
+        return MovieCastMember.builder()
+                .adult(tmdbCastMember.getAdult())
+                .backdropPath(tmdbCastMember.getBackdropPath())
+                .character(tmdbCastMember.getCharacter())
+                .creditId(tmdbCastMember.getCreditId())
+                .genreIds(tmdbCastMember.getGenreIds())
+                .id(tmdbCastMember.getId())
+                .order(tmdbCastMember.getOrder())
+                .originalLanguage(tmdbCastMember.getOriginalLanguage())
+                .originalTitle(tmdbCastMember.getOriginalTitle())
+                .overview(tmdbCastMember.getOverview())
+                .popularity(tmdbCastMember.getPopularity())
+                .posterPath(tmdbCastMember.getPosterPath())
+                .releaseDate(tmdbCastMember.getReleaseDate())
+                .title(tmdbCastMember.getTitle())
+                .video(tmdbCastMember.getVideo())
+                .voteAverage(tmdbCastMember.getVoteAverage())
+                .voteCount(tmdbCastMember.getVoteCount())
+                .build();
+    }
+
+    public MovieCrewMember mapTMDBMovieCrewMemberToMovieCrewMember(final MovieCrew tmdbCrewMember) {
+        return MovieCrewMember.builder()
+                .adult(tmdbCrewMember.getAdult())
+                .backdropPath(tmdbCrewMember.getBackdropPath())
+                .creditId(tmdbCrewMember.getCreditId())
+                .department(tmdbCrewMember.getDepartment())
+                .genreIds(tmdbCrewMember.getGenreIds())
+                .id(tmdbCrewMember.getId())
+                .job(tmdbCrewMember.getJob())
+                .originalLanguage(tmdbCrewMember.getOriginalLanguage())
+                .originalTitle(tmdbCrewMember.getOriginalTitle())
+                .overview(tmdbCrewMember.getOverview())
+                .popularity(tmdbCrewMember.getPopularity())
+                .posterPath(tmdbCrewMember.getPosterPath())
+                .releaseDate(tmdbCrewMember.getReleaseDate())
+                .title(tmdbCrewMember.getTitle())
+                .video(tmdbCrewMember.getVideo())
+                .voteAverage(tmdbCrewMember.getVoteAverage())
+                .voteCount(tmdbCrewMember.getVoteCount())
+                .build();
+    }
+
+    public Person mapTMDBPersonToPerson(final PersonDb personDb,
+                                        final MovieCredits movieCredits,
+                                        final TvCredits tvCredits) {
+        return Person.builder()
+                .adult(personDb.getAdult())
+                .alsoKnownAs(personDb.getAlsoKnownAs())
+                .biography(personDb.getBiography())
+                .birthday(personDb.getBirthday())
+                .deathday(personDb.getDeathDay())
+                .gender(personDb.getGender() != null ? personDb.getGender().ordinal() : 0)
+                .homepage(personDb.getHomepage())
+                .id(personDb.getId())
+                .imdbId(personDb.getImdbId())
+                .knownForDepartment(personDb.getKnownForDepartment())
+                .name(personDb.getName())
+                .placeOfBirth(personDb.getPlaceOfBirth())
+                .popularity(personDb.getPopularity())
+                .profilePath(personDb.getProfilePath())
+                .movieCredits(movieCredits)
+                .tvCredits(tvCredits)
+                .build();
+    }
+
+    public TvCastMember mapTMDBTvCastMemberToTvCastMember(final TvCast tmdbTvCastMember) {
+        return TvCastMember.builder()
+                .adult(tmdbTvCastMember.getAdult())
+                .backdropPath(tmdbTvCastMember.getBackdropPath())
+                .character(tmdbTvCastMember.getCharacter())
+                .creditId(tmdbTvCastMember.getCreditId())
+                .episodeCount(tmdbTvCastMember.getEpisodeCount())
+                .firstAirDate(tmdbTvCastMember.getFirstAirDate())
+//                .firstCreditAirDate(tmdbTvCastMember.getFirstCreditAirDate())
+                .genreIds(tmdbTvCastMember.getGenreIds())
+                .id(tmdbTvCastMember.getId())
+                .name(tmdbTvCastMember.getName())
+                .originCountry(tmdbTvCastMember.getOriginCountry())
+                .originalLanguage(tmdbTvCastMember.getOriginalLanguage())
+                .originalName(tmdbTvCastMember.getOriginalName())
+                .overview(tmdbTvCastMember.getOverview())
+                .popularity(tmdbTvCastMember.getPopularity())
+                .posterPath(tmdbTvCastMember.getPosterPath())
+                .voteAverage(tmdbTvCastMember.getVoteAverage())
+                .voteCount(tmdbTvCastMember.getVoteCount())
+                .build();
+    }
+
+    public TvCrewMember mapTMDBTvCrewMemberToTvCrewMember(final TvCrew tmdbTvCrewMember) {
+        return TvCrewMember.builder()
+                .adult(tmdbTvCrewMember.getAdult())
+                .backdropPath(tmdbTvCrewMember.getBackdropPath())
+                .creditId(tmdbTvCrewMember.getCreditId())
+                .episodeCount(tmdbTvCrewMember.getEpisodeCount())
+                .firstAirDate(tmdbTvCrewMember.getFirstAirDate())
+//                .firstCreditAirDate(tmdbTvCrewMember.getFirstCreditAirDate())
+                .genreIds(tmdbTvCrewMember.getGenreIds())
+                .id(tmdbTvCrewMember.getId())
+                .name(tmdbTvCrewMember.getName())
+                .originCountry(tmdbTvCrewMember.getOriginCountry())
+                .originalLanguage(tmdbTvCrewMember.getOriginalLanguage())
+                .originalName(tmdbTvCrewMember.getOriginalName())
+                .overview(tmdbTvCrewMember.getOverview())
+                .popularity(tmdbTvCrewMember.getPopularity())
+                .posterPath(tmdbTvCrewMember.getPosterPath())
+                .voteAverage(tmdbTvCrewMember.getVoteAverage())
+                .voteCount(tmdbTvCrewMember.getVoteCount())
+                .department(tmdbTvCrewMember.getDepartment())
+                .job(tmdbTvCrewMember.getJob())
                 .build();
     }
 }

@@ -8,6 +8,7 @@ import com.sabianrobi.frameshelf.entity.movie.SpokenLanguage;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -21,7 +22,7 @@ public class MovieWithoutCreditsResponse {
     String homepage;
     int id;
     String imdbId;
-    String[] originalCountry;
+    List<String> originalCountry;
     String originalLanguage;
     String originalTitle;
     String overview;

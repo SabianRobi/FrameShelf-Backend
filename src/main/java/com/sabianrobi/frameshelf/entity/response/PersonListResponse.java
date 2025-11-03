@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PersonListResponse extends ListResponse {
-    private Set<PersonResponse> people;
+    private Set<PersonInListResponse> people;
 
     /**
      * Create an ActorListResponse from an ActorList entity
@@ -37,7 +37,7 @@ public class PersonListResponse extends ListResponse {
                 .userId(personList.getUser() != null ? personList.getUser().getId() : null)
                 .people(personList.getPeople() != null && personMapper != null ?
                         personList.getPeople().stream()
-                                .map(personMapper::mapPersonToPersonResponse)
+                                .map(personMapper::mapPersonToPersonInListResponse)
                                 .collect(Collectors.toSet()) : null)
                 .build();
     }

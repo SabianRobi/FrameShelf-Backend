@@ -17,7 +17,11 @@ spring.jpa.hibernate.ddl-auto=update
 # The Movie Database read key
 tmdb.api.read-key=
 
-# Session Configuration
+# JWT Configuration
+jwt.secret=change-this-to-a-secure-random-secret-key-min-32-characters-long
+jwt.expiration=2592000000
+
+# Session Configuration (Not used with JWT, but keeping for compatibility)
 server.servlet.session.cookie.http-only=true
 server.servlet.session.cookie.secure=false
 server.servlet.session.cookie.same-site=lax

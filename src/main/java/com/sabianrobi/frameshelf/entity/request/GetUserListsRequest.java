@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetUserListsRequest {
     private String type; // Optional: "MOVIE" or "PERSON", null returns both
+    private String name; // Optional: filters lists by name (case-insensitive contains)
 }

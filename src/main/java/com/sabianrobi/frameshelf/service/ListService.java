@@ -107,15 +107,27 @@ public class ListService {
     public java.util.List<List> getUserLists(final UUID userId, final GetUserListsRequest request) {
         final java.util.List<List> allLists = new ArrayList<>();
         final String type = request != null ? request.getType() : null;
+        final String nameFilter = request != null ? request.getName() : null;
+
+        // Determine whether to filter by name
+        final boolean hasNameFilter = nameFilter != null && !nameFilter.trim().isEmpty();
 
         // If no type is specified or type is "MOVIE", include movie lists
         if (type == null || type.equalsIgnoreCase("MOVIE")) {
-            allLists.addAll(movieListRepository.findByUserId(userId));
+            if (hasNameFilter) {
+                allLists.addAll(movieListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter.trim()));
+            } else {
+                allLists.addAll(movieListRepository.findByUserId(userId));
+            }
         }
 
         // If no type is specified or type is "PERSON", include person lists
         if (type == null || type.equalsIgnoreCase("PERSON")) {
-            allLists.addAll(personListRepository.findByUserId(userId));
+            if (hasNameFilter) {
+                allLists.addAll(personListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter.trim()));
+            } else {
+                allLists.addAll(personListRepository.findByUserId(userId));
+            }
         }
 
         // If type is specified but not recognized, throw exception

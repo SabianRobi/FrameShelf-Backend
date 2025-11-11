@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface MovieListRepository extends CrudRepository<MovieList, UUID> {
     List<MovieList> findByUserId(final UUID userId);
+
+    List<MovieList> findByUserIdAndNameContainingIgnoreCase(final UUID userId, final String name);
 }

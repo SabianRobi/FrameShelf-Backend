@@ -2,10 +2,7 @@ package com.sabianrobi.frameshelf.controller;
 
 import com.sabianrobi.frameshelf.entity.List;
 import com.sabianrobi.frameshelf.entity.User;
-import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
-import com.sabianrobi.frameshelf.entity.request.CreateListRequest;
-import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
-import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
+import com.sabianrobi.frameshelf.entity.request.*;
 import com.sabianrobi.frameshelf.entity.response.ListResponse;
 import com.sabianrobi.frameshelf.mapper.MovieMapper;
 import com.sabianrobi.frameshelf.mapper.PersonMapper;
@@ -38,6 +35,7 @@ public class ListController {
     @GetMapping("/{userId}/lists")
     public ResponseEntity<java.util.List<ListResponse>> getUserLists(
             @PathVariable("userId") final UUID userId,
+            @ModelAttribute final GetUserListsRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         try {
             // Verify the authenticated user matches the path parameter
@@ -46,7 +44,7 @@ public class ListController {
                 return ResponseEntity.status(403).build();
             }
 
-            final java.util.List<List> lists = listService.getUserLists(userId);
+            final java.util.List<List> lists = listService.getUserLists(userId, request);
 
             final java.util.List<ListResponse> listResponses = lists.stream()
                     .map(list -> ListResponse.fromList(list, movieMapper, personMapper))

@@ -5,6 +5,7 @@ import com.sabianrobi.frameshelf.entity.movie.*;
 import com.sabianrobi.frameshelf.entity.person.*;
 import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
+import com.sabianrobi.frameshelf.entity.request.GetUserListsRequest;
 import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
 import com.sabianrobi.frameshelf.mapper.*;
 import com.sabianrobi.frameshelf.repository.*;
@@ -106,10 +107,24 @@ public class ListService {
 
     // ----- List operations -----
 
-    public java.util.List<List> getUserLists(final UUID userId) {
+    public java.util.List<List> getUserLists(final UUID userId, final GetUserListsRequest request) {
         final java.util.List<List> allLists = new ArrayList<>();
-        allLists.addAll(movieListRepository.findByUserId(userId));
-        allLists.addAll(personListRepository.findByUserId(userId));
+        final String type = request != null ? request.getType() : null;
+
+        // If no type is specified or type is "MOVIE", include movie lists
+        if (type == null || type.equalsIgnoreCase("MOVIE")) {
+            allLists.addAll(movieListRepository.findByUserId(userId));
+        }
+
+        // If no type is specified or type is "PERSON", include person lists
+        if (type == null || type.equalsIgnoreCase("PERSON")) {
+            allLists.addAll(personListRepository.findByUserId(userId));
+        }
+
+        // If type is specified but not recognized, throw exception
+        if (type != null && !type.equalsIgnoreCase("MOVIE") && !type.equalsIgnoreCase("PERSON")) {
+            throw new IllegalArgumentException("Invalid list type: " + type + ". Valid types are: MOVIE, PERSON");
+        }
 
         return allLists;
     }

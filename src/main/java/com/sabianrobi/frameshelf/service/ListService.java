@@ -7,7 +7,10 @@ import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
 import com.sabianrobi.frameshelf.entity.request.GetUserListsRequest;
 import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
-import com.sabianrobi.frameshelf.mapper.*;
+import com.sabianrobi.frameshelf.mapper.CreditMapper;
+import com.sabianrobi.frameshelf.mapper.MovieCreditMapper;
+import com.sabianrobi.frameshelf.mapper.TMDBMapper;
+import com.sabianrobi.frameshelf.mapper.TvCreditMapper;
 import com.sabianrobi.frameshelf.repository.*;
 import info.movito.themoviedbapi.model.movies.MovieDb;
 import info.movito.themoviedbapi.model.people.PersonDb;
@@ -38,9 +41,6 @@ public class ListService {
 
     @Autowired
     private TMDBService tmdbService;
-
-    @Autowired
-    private MovieMapper movieMapper;
 
     @Autowired
     private TMDBMapper tmdbMapper;
@@ -89,9 +89,6 @@ public class ListService {
 
     @Autowired
     private MovieCreditRepository movieCreditRepository;
-
-    @Autowired
-    private PersonMapper personMapper;
 
     @Autowired
     private TvCastMemberRepository tvCastMemberRepository;
@@ -230,7 +227,7 @@ public class ListService {
                 throw new RuntimeException("User doesn't have access to this list");
             }
 
-            final MovieInList movieInList = createMovieInList(listId, userId, request, movieList);
+            final MovieInList movieInList = createMovieInList(request, movieList);
 
             movieList.getMovies().add(movieInList);
             return movieListRepository.save(movieList);
@@ -243,7 +240,7 @@ public class ListService {
                 throw new RuntimeException("User doesn't have access to this list");
             }
 
-            final PersonInList personInList = createPersonInList(listId, userId, request, personList);
+            final PersonInList personInList = createPersonInList(request, personList);
 
             personList.getPeople().add(personInList);
             return personListRepository.save(personList);
@@ -299,9 +296,7 @@ public class ListService {
 
     // ----- Helper methods -----
 
-    private MovieInList createMovieInList(final UUID listId,
-                                          final UUID userId,
-                                          final AddItemToListRequest request,
+    private MovieInList createMovieInList(final AddItemToListRequest request,
                                           final MovieList movieList
     ) {
         final Integer itemId = request.getItemId();
@@ -413,9 +408,7 @@ public class ListService {
                 .build();
     }
 
-    private PersonInList createPersonInList(final UUID listId,
-                                            final UUID userId,
-                                            final AddItemToListRequest request,
+    private PersonInList createPersonInList(final AddItemToListRequest request,
                                             final PersonList personList
     ) {
         final Integer itemId = request.getItemId();
@@ -532,9 +525,7 @@ public class ListService {
                                       final UUID listId) {
         // Verify item exists in list
         if (movieList.getMovies().stream().noneMatch(
-                movieInList -> {
-                    return movieInList.getId().equals(itemId);
-                }
+                movieInList -> movieInList.getId().equals(itemId)
         )) {
             throw new RuntimeException("Item not found in list");
         }
@@ -566,9 +557,7 @@ public class ListService {
                                         final UUID listId) {
         // Verify item exists in list
         if (personList.getPeople().stream().noneMatch(
-                personInList -> {
-                    return personInList.getId().equals(itemId);
-                }
+                personInList -> personInList.getId().equals(itemId)
         )) {
             throw new RuntimeException("Item not found in list");
         }

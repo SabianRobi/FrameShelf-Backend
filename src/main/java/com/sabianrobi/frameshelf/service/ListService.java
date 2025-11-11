@@ -244,45 +244,16 @@ public class ListService {
                                final UUID userId) {
 
         // Verify list ownership
-        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
-        MovieList movieList = null;
-        if (movieListOpt.isPresent()) {
-            movieList = movieListOpt.get();
-            if (!movieList.getUser().getId().equals(userId)) {
-                throw new RuntimeException("User doesn't have access to this list");
-            }
+        final MovieList movieList = getMovieList(listId, userId);
+        final PersonList personList = getPersonList(listId, userId);
+
+        if (movieList != null) {
+            return editMovieInList(movieList, itemId, request, listId);
+        } else if (personList != null) {
+            return editPersonInList(personList, itemId, request, listId);
+        } else {
+            throw new RuntimeException("List not found");
         }
-
-        // Verify item exists in list
-        assert movieList != null;
-        if (movieList.getMovies().stream().noneMatch(
-                movieInList -> {
-                    System.out.println("Comparing movieInList ID: " + movieInList.getId() + " with itemId: " + itemId);
-                    return movieInList.getId().equals(itemId);
-                }
-        )) {
-            throw new RuntimeException("Item not found in list");
-        }
-
-        // Fetch the MovieInList entity
-        final MovieInList movieInList = movieInListRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found in list"));
-
-        // Edit the fields
-        if (request.getNotes() != null) {
-            movieInList.setNotes(request.getNotes());
-        }
-
-        if (request.getWatchedAt() != null) {
-            movieInList.setWatchedAt(request.getWatchedAt());
-        }
-
-        // Save and return
-        movieInListRepository.save(movieInList);
-
-        // Fetch the updated list to ensure it contains the newly updated item
-        return movieListRepository.findById(listId)
-                .orElseThrow(() -> new RuntimeException("List not found after update"));
     }
 
     @Transactional
@@ -513,5 +484,95 @@ public class ListService {
                 .addedAt(LocalDateTime.now())
                 .notes(request.getNotes())
                 .build();
+    }
+
+    private MovieList getMovieList(final UUID listId, final UUID userId) {
+        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
+        MovieList movieList = null;
+
+        if (movieListOpt.isPresent()) {
+            movieList = movieListOpt.get();
+            if (!movieList.getUser().getId().equals(userId)) {
+                throw new RuntimeException("User doesn't have access to this list");
+            }
+        }
+        return movieList;
+    }
+
+    private PersonList getPersonList(final UUID listId, final UUID userId) {
+        PersonList personList = null;
+        final Optional<PersonList> personListOpt = personListRepository.findById(listId);
+
+        if (personListOpt.isPresent()) {
+            personList = personListOpt.get();
+            if (!personList.getUser().getId().equals(userId)) {
+                throw new RuntimeException("User doesn't have access to this list");
+            }
+        }
+        return personList;
+    }
+
+    private MovieList editMovieInList(final MovieList movieList,
+                                      final UUID itemId,
+                                      final EditItemInListRequest request,
+                                      final UUID listId) {
+        // Verify item exists in list
+        if (movieList.getMovies().stream().noneMatch(
+                movieInList -> {
+                    return movieInList.getId().equals(itemId);
+                }
+        )) {
+            throw new RuntimeException("Item not found in list");
+        }
+
+        // Fetch the MovieInList entity
+        final MovieInList movieInList = movieInListRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found in list"));
+
+        // Edit the fields
+        if (request.getNotes() != null) {
+            movieInList.setNotes(request.getNotes());
+        }
+
+        if (request.getWatchedAt() != null) {
+            movieInList.setWatchedAt(request.getWatchedAt());
+        }
+
+        // Save and return
+        movieInListRepository.save(movieInList);
+
+        // Fetch the updated list to ensure it contains the newly updated item
+        return movieListRepository.findById(listId)
+                .orElseThrow(() -> new RuntimeException("List not found after update"));
+    }
+
+    private PersonList editPersonInList(final PersonList personList,
+                                        final UUID itemId,
+                                        final EditItemInListRequest request,
+                                        final UUID listId) {
+        // Verify item exists in list
+        if (personList.getPeople().stream().noneMatch(
+                personInList -> {
+                    return personInList.getId().equals(itemId);
+                }
+        )) {
+            throw new RuntimeException("Item not found in list");
+        }
+
+        // Fetch the MovieInList entity
+        final PersonInList personInList = personInListRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found in list"));
+
+        // Edit the fields
+        if (request.getNotes() != null) {
+            personInList.setNotes(request.getNotes());
+        }
+
+        // Save and return
+        personInListRepository.save(personInList);
+
+        // Fetch the updated list to ensure it contains the newly updated item
+        return personListRepository.findById(listId)
+                .orElseThrow(() -> new RuntimeException("List not found after update"));
     }
 }

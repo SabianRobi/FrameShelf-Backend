@@ -28,13 +28,17 @@ import java.util.UUID;
 @Service
 public class ListService {
     @Autowired
+    private ListRepository listRepository;
+
+    @Autowired
     private MovieListRepository movieListRepository;
+
+    @Autowired
+    private MovieRepository movieRepository;
 
     @Autowired
     private PersonListRepository personListRepository;
 
-    @Autowired
-    private MovieRepository movieRepository;
 
     @Autowired
     private PersonRepository personRepository;
@@ -105,34 +109,17 @@ public class ListService {
     // ----- List operations -----
 
     public java.util.List<List> getUserLists(final UUID userId, final GetUserListsRequest request) {
-        final java.util.List<List> allLists = new ArrayList<>();
-        final String type = request != null ? request.getType() : null;
-        final String nameFilter = request != null ? request.getName() : null;
-
+        final java.util.List<List> allLists;
+        
         // Determine whether to filter by name
+        final String nameFilter = request != null ? request.getName() : null;
         final boolean hasNameFilter = nameFilter != null && !nameFilter.trim().isEmpty();
 
         // If no type is specified or type is "MOVIE", include movie lists
-        if (type == null || type.equalsIgnoreCase("MOVIE")) {
-            if (hasNameFilter) {
-                allLists.addAll(movieListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter.trim()));
-            } else {
-                allLists.addAll(movieListRepository.findByUserId(userId));
-            }
-        }
-
-        // If no type is specified or type is "PERSON", include person lists
-        if (type == null || type.equalsIgnoreCase("PERSON")) {
-            if (hasNameFilter) {
-                allLists.addAll(personListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter.trim()));
-            } else {
-                allLists.addAll(personListRepository.findByUserId(userId));
-            }
-        }
-
-        // If type is specified but not recognized, throw exception
-        if (type != null && !type.equalsIgnoreCase("MOVIE") && !type.equalsIgnoreCase("PERSON")) {
-            throw new IllegalArgumentException("Invalid list type: " + type + ". Valid types are: MOVIE, PERSON");
+        if (hasNameFilter) {
+            allLists = new ArrayList<>(listRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter.trim()));
+        } else {
+            allLists = new ArrayList<>(listRepository.findByUserId(userId));
         }
 
         return allLists;

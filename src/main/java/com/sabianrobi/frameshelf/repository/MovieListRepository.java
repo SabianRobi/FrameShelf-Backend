@@ -4,12 +4,8 @@ import com.sabianrobi.frameshelf.entity.MovieList;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface MovieListRepository extends CrudRepository<MovieList, UUID> {
-    List<MovieList> findByUserId(final UUID userId);
-
-    List<MovieList> findByUserIdAndNameContainingIgnoreCase(final UUID userId, final String name);
 }

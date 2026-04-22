@@ -56,7 +56,6 @@ public class GoogleUserService implements OAuth2UserService<OAuth2UserRequest, O
                     .fullName(name)
                     .googleId(googleId)
                     .picture(picture)
-                    .createdAt(now)
                     .lastLoginAt(now)
                     .build();
         }

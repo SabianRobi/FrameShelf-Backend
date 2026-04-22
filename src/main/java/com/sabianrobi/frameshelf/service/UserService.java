@@ -2,8 +2,6 @@ package com.sabianrobi.frameshelf.service;
 
 import com.sabianrobi.frameshelf.entity.GoogleUser;
 import com.sabianrobi.frameshelf.entity.User;
-import com.sabianrobi.frameshelf.mapper.MovieMapper;
-import com.sabianrobi.frameshelf.repository.MovieRepository;
 import com.sabianrobi.frameshelf.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,16 +15,10 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private MovieRepository movieRepository;
-
-    @Autowired
-    private MovieMapper movieMapper;
-
     public Optional<User> findById(final UUID id) {
         return userRepository.findById(id);
     }
-    
+
     public User findOrCreateUserForGoogleUser(final GoogleUser googleUser) {
         // Try to find an existing user linked to this GoogleUser
         Optional<User> existingUser = userRepository.findByGoogleUser(googleUser);
@@ -54,7 +46,6 @@ public class UserService {
                     .displayName(googleUser.getFullName())
                     .profilePicture(googleUser.getPicture())
                     .googleUser(googleUser)
-                    .createdAt(LocalDateTime.now())
                     .lastLoginAt(LocalDateTime.now())
                     .build();
 

@@ -2,21 +2,21 @@ package com.sabianrobi.frameshelf.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoogleUser {
-    @Id
+@EqualsAndHashCode(callSuper = true)
+public class GoogleUser extends BaseEntity {
     private String googleId;
 
     @Column(unique = true)
@@ -26,6 +26,5 @@ public class GoogleUser {
     private String picture;
 
     private String fullName;
-    private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
 }

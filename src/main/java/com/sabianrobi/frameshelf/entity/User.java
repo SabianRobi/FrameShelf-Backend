@@ -2,25 +2,20 @@ package com.sabianrobi.frameshelf.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @EqualsAndHashCode.Include
-    private UUID id;
-
+@EqualsAndHashCode(callSuper = false)
+public class User extends BaseEntity {
     @Column(unique = true)
     private String username;
 
@@ -28,7 +23,6 @@ public class User {
 
     @Column(length = 1536)
     private String profilePicture;
-    private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
 
     @OneToOne

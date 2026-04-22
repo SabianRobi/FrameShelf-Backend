@@ -4,6 +4,7 @@ import com.sabianrobi.frameshelf.entity.List;
 import com.sabianrobi.frameshelf.entity.User;
 import com.sabianrobi.frameshelf.entity.request.*;
 import com.sabianrobi.frameshelf.entity.response.ListResponse;
+import com.sabianrobi.frameshelf.error.Exception.NotAuthorizedException;
 import com.sabianrobi.frameshelf.mapper.MovieMapper;
 import com.sabianrobi.frameshelf.mapper.PersonMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
@@ -41,7 +42,7 @@ public class ListController {
         // Verify the authenticated user matches the path parameter
         final User user = customOAuth2User.getUser();
         if (!user.getId().equals(userId)) {
-            throw new RuntimeException("Authenticated user does not match the requested user ID");
+            throw new NotAuthorizedException("User is not authorized to access these lists");
         }
 
         final Pageable pageable = Pageable.ofSize(request.getPageSize()).withPage(request.getPage());

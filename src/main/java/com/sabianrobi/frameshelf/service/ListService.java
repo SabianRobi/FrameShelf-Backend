@@ -16,11 +16,12 @@ import info.movito.themoviedbapi.model.movies.MovieDb;
 import info.movito.themoviedbapi.model.people.PersonDb;
 import info.movito.themoviedbapi.tools.TmdbException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -108,9 +109,7 @@ public class ListService {
 
     // ----- List operations -----
 
-    public java.util.List<List> getUserLists(final UUID userId, final GetUserListsRequest request) {
-        final java.util.List<List> lists;
-
+    public Page getUserLists(final UUID userId, final GetUserListsRequest request, final Pageable pageable) {
         // Determine the type of list to fetch based on the request
         final String type = request.getType().isBlank() ? "ALL" : request.getType();
         final String nameFilter = request.getName().isBlank() ? null : request.getName();
@@ -120,30 +119,22 @@ public class ListService {
 
         switch (type) {
             case "MOVIE" -> {
-                if (hasNameFilter) {
-                    lists = new ArrayList<>(movieListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter));
-                } else {
-                    lists = new ArrayList<>(movieListRepository.findByUserId(userId));
-                }
+                return hasNameFilter
+                        ? movieListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter, pageable)
+                        : movieListRepository.findByUserId(userId, pageable);
             }
             case "PERSON" -> {
-                if (hasNameFilter) {
-                    lists = new ArrayList<>(personListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter));
-                } else {
-                    lists = new ArrayList<>(personListRepository.findByUserId(userId));
-                }
+                return hasNameFilter
+                        ? personListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter, pageable)
+                        : personListRepository.findByUserId(userId, pageable);
             }
             case "ALL" -> {
-                if (hasNameFilter) {
-                    lists = new ArrayList<>(listRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter));
-                } else {
-                    lists = new ArrayList<>(listRepository.findByUserId(userId));
-                }
+                return hasNameFilter
+                        ? listRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter, pageable)
+                        : listRepository.findByUserId(userId, pageable);
             }
-            default -> throw new IllegalArgumentException("Invalid list type. Must be 'MOVIE', 'PERSON', or 'ALL'");
+            default -> throw new IllegalArgumentException("Invalid list type");
         }
-
-        return lists;
     }
 
     public List getListById(final UUID listId, final UUID userId) {

@@ -9,13 +9,14 @@ import com.sabianrobi.frameshelf.mapper.PersonMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.ListService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -33,31 +34,21 @@ public class ListController {
     // ----- List Endpoints -----
 
     @GetMapping("/{userId}/lists")
-    public ResponseEntity<java.util.List<ListResponse>> getUserLists(
+    public Page getUserLists(
             @PathVariable("userId") final UUID userId,
             @ModelAttribute final GetUserListsRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
-        try {
-            // Verify the authenticated user matches the path parameter
-            final User user = customOAuth2User.getUser();
-            if (!user.getId().equals(userId)) {
-                return ResponseEntity.status(403).build();
-            }
-
-            final java.util.List<List> lists = listService.getUserLists(userId, request);
-
-            final java.util.List<ListResponse> listResponses = lists.stream()
-                    .map(list -> ListResponse.fromList(list, movieMapper, personMapper))
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(listResponses);
-        } catch (final IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (final RuntimeException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.notFound().build();
+        // Verify the authenticated user matches the path parameter
+        final User user = customOAuth2User.getUser();
+        if (!user.getId().equals(userId)) {
+            throw new RuntimeException("Authenticated user does not match the requested user ID");
         }
+
+        final Pageable pageable = Pageable.ofSize(request.getPageSize()).withPage(request.getPage());
+
+        final Page lists = listService.getUserLists(userId, request, pageable);
+
+        return lists.map(list -> ListResponse.fromList((List) list, movieMapper, personMapper));
     }
 
     @PostMapping("/{userId}/lists")

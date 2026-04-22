@@ -8,4 +8,7 @@ import java.util.UUID;
 
 @Repository
 public interface MovieListRepository extends CrudRepository<MovieList, UUID> {
+    java.util.List<MovieList> findByUserId(final UUID userId);
+
+    java.util.List<MovieList> findByUserIdAndNameContainingIgnoreCase(final UUID userId, final String name);
 }

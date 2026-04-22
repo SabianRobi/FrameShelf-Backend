@@ -109,20 +109,41 @@ public class ListService {
     // ----- List operations -----
 
     public java.util.List<List> getUserLists(final UUID userId, final GetUserListsRequest request) {
-        final java.util.List<List> allLists;
-        
+        final java.util.List<List> lists;
+
+        // Determine the type of list to fetch based on the request
+        final String type = request.getType().isBlank() ? "ALL" : request.getType();
+        final String nameFilter = request.getName().isBlank() ? null : request.getName();
+
         // Determine whether to filter by name
-        final String nameFilter = request != null ? request.getName() : null;
         final boolean hasNameFilter = nameFilter != null && !nameFilter.trim().isEmpty();
 
-        // If no type is specified or type is "MOVIE", include movie lists
-        if (hasNameFilter) {
-            allLists = new ArrayList<>(listRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter.trim()));
-        } else {
-            allLists = new ArrayList<>(listRepository.findByUserId(userId));
+        switch (type) {
+            case "MOVIE" -> {
+                if (hasNameFilter) {
+                    lists = new ArrayList<>(movieListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter));
+                } else {
+                    lists = new ArrayList<>(movieListRepository.findByUserId(userId));
+                }
+            }
+            case "PERSON" -> {
+                if (hasNameFilter) {
+                    lists = new ArrayList<>(personListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter));
+                } else {
+                    lists = new ArrayList<>(personListRepository.findByUserId(userId));
+                }
+            }
+            case "ALL" -> {
+                if (hasNameFilter) {
+                    lists = new ArrayList<>(listRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter));
+                } else {
+                    lists = new ArrayList<>(listRepository.findByUserId(userId));
+                }
+            }
+            default -> throw new IllegalArgumentException("Invalid list type. Must be 'MOVIE', 'PERSON', or 'ALL'");
         }
 
-        return allLists;
+        return lists;
     }
 
     public List getListById(final UUID listId, final UUID userId) {

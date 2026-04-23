@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -20,6 +21,8 @@ public abstract class ListResponse {
     private UUID id;
     private String name;
     private UUID userId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     /**
      * Create a ListResponse from a List entity

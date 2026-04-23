@@ -9,14 +9,18 @@ import com.sabianrobi.frameshelf.mapper.MovieMapper;
 import com.sabianrobi.frameshelf.mapper.PersonMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.ListService;
+import com.sabianrobi.frameshelf.utility.Helper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -38,19 +42,26 @@ public class ListController {
     public Page getUserLists(
             @PathVariable("userId") final UUID userId,
             @ModelAttribute final GetUserListsRequest request,
-            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User,
+            @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) final Pageable pageable
+    ) {
         // Verify the authenticated user matches the path parameter
         final User user = customOAuth2User.getUser();
         if (!user.getId().equals(userId)) {
             throw new NotAuthorizedException("User is not authorized to access these lists");
         }
 
-        final Pageable pageable = Pageable.ofSize(request.getPageSize()).withPage(request.getPage());
+        // Sorting & Pagination
+        final Set<String> allowedKeys = Set.of("name", "createdAt", "updatedAt");
+        final Pageable safePageable = Helper.getSafePageable(pageable, allowedKeys);
 
-        final Page lists = listService.getUserLists(userId, request, pageable);
+        // Getting the data
+        final Page lists = listService.getUserLists(userId, request, safePageable);
 
+        // Returning data
         return lists.map(list -> ListResponse.fromList((List) list, movieMapper, personMapper));
     }
+
 
     @PostMapping("/{userId}/lists")
     public ResponseEntity<ListResponse> createList(

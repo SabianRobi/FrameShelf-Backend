@@ -36,10 +36,12 @@ public class MovieListResponse extends ListResponse {
                 .name(movieList.getName())
                 .userId(movieList.getUser() != null ? movieList.getUser().getId() : null)
                 .movies(movieList.getMovies() != null && movieMapper != null
-                        ? movieList.getMovies()
-                        .stream()
-                        .map(movieMapper::mapMovieInListToMovieInListResponse).collect(Collectors.toSet())
+                        ? movieList.getMovies().stream()
+                          .map(movieMapper::mapMovieInListToMovieInListResponse)
+                          .collect(Collectors.toSet())
                         : null)
+                .createdAt(movieList.getCreatedAt())
+                .updatedAt(movieList.getUpdatedAt())
                 .build();
     }
 }

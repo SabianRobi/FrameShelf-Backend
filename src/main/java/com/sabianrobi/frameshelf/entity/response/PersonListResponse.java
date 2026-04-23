@@ -35,10 +35,13 @@ public class PersonListResponse extends ListResponse {
                 .id(personList.getId())
                 .name(personList.getName())
                 .userId(personList.getUser() != null ? personList.getUser().getId() : null)
-                .people(personList.getPeople() != null && personMapper != null ?
-                        personList.getPeople().stream()
-                                .map(personMapper::mapPersonToPersonInListResponse)
-                                .collect(Collectors.toSet()) : null)
+                .people(personList.getPeople() != null && personMapper != null
+                        ? personList.getPeople().stream()
+                          .map(personMapper::mapPersonToPersonInListResponse)
+                          .collect(Collectors.toSet())
+                        : null)
+                .createdAt(personList.getCreatedAt())
+                .updatedAt(personList.getUpdatedAt())
                 .build();
     }
 }

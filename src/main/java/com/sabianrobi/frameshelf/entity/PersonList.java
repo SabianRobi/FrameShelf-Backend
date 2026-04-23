@@ -22,4 +22,3 @@ public class PersonList extends List {
     @Builder.Default
     private Set<PersonInList> people = new HashSet<>();
 }
-

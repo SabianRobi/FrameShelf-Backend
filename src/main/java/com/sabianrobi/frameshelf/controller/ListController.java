@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.sabianrobi.frameshelf.utility.Helper.verifyUserHasAccessToList;
+
 @RestController
 @RequestMapping("/api/v1/user")
 public class ListController {
@@ -43,13 +45,8 @@ public class ListController {
             @PathVariable("userId") final UUID userId,
             @ModelAttribute final GetUserListsRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User,
-            @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) final Pageable pageable
-    ) {
-        // Verify the authenticated user matches the path parameter
-        final User user = customOAuth2User.getUser();
-        if (!user.getId().equals(userId)) {
-            throw new NotAuthorizedException("User is not authorized to access these lists");
-        }
+            @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) final Pageable pageable) {
+        verifyUserHasAccessToList(customOAuth2User, userId);
 
         // Sorting & Pagination
         final Set<String> allowedKeys = Set.of("name", "createdAt", "updatedAt");
@@ -68,13 +65,10 @@ public class ListController {
             @PathVariable("userId") final UUID userId,
             @RequestBody final CreateListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        verifyUserHasAccessToList(customOAuth2User, userId);
+
         try {
             final User user = customOAuth2User.getUser();
-
-            // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userId)) {
-                return ResponseEntity.status(403).build();
-            }
 
             final List list = listService.createList(user, request.getName(), request.getType());
             return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
@@ -92,13 +86,9 @@ public class ListController {
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        verifyUserHasAccessToList(customOAuth2User, userId);
+
         try {
-
-            final User user = customOAuth2User.getUser();
-            if (!user.getId().equals(userId)) {
-                return ResponseEntity.status(403).build();
-            }
-
             final List list = listService.getListById(listId, userId);
 
             return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
@@ -117,13 +107,10 @@ public class ListController {
             @PathVariable("listId") final UUID listId,
             @RequestBody final UpdateListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        verifyUserHasAccessToList(customOAuth2User, userId);
+
         try {
             final User user = customOAuth2User.getUser();
-
-            // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userId)) {
-                return ResponseEntity.status(403).build();
-            }
 
             final List updatedList = listService.updateList(listId, request, user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
@@ -141,13 +128,10 @@ public class ListController {
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        verifyUserHasAccessToList(customOAuth2User, userId);
+
         try {
             final User user = customOAuth2User.getUser();
-
-            // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userId)) {
-                return ResponseEntity.status(403).build();
-            }
 
             listService.deleteList(listId, user.getId());
             return ResponseEntity.noContent().build();
@@ -168,13 +152,10 @@ public class ListController {
             @PathVariable("listId") final UUID listId,
             @RequestBody final AddItemToListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        verifyUserHasAccessToList(customOAuth2User, userId);
+
         try {
             final User user = customOAuth2User.getUser();
-
-            // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userId)) {
-                return ResponseEntity.status(403).build();
-            }
 
             final List updatedList = listService.addItemToList(listId, request, user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
@@ -195,13 +176,10 @@ public class ListController {
             @PathVariable("itemId") final UUID itemId,
             @RequestBody final EditItemInListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        verifyUserHasAccessToList(customOAuth2User, userId);
+
         try {
             final User user = customOAuth2User.getUser();
-
-            // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userId)) {
-                return ResponseEntity.status(403).build();
-            }
 
             final List updatedList = listService.editItemInList(listId, itemId, request, user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
@@ -220,13 +198,10 @@ public class ListController {
             @PathVariable("listId") final UUID listId,
             @PathVariable("itemId") final UUID itemId,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        verifyUserHasAccessToList(customOAuth2User, userId);
+
         try {
             final User user = customOAuth2User.getUser();
-
-            // Verify the authenticated user matches the path parameter
-            if (!user.getId().equals(userId)) {
-                return ResponseEntity.status(403).build();
-            }
 
             final List updatedList = listService.removeItemFromList(listId, itemId, user.getId());
             return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));

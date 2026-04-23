@@ -7,6 +7,7 @@ import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
 import com.sabianrobi.frameshelf.entity.request.GetUserListsRequest;
 import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
+import com.sabianrobi.frameshelf.error.Exception.NotFoundException;
 import com.sabianrobi.frameshelf.mapper.CreditMapper;
 import com.sabianrobi.frameshelf.mapper.MovieCreditMapper;
 import com.sabianrobi.frameshelf.mapper.TMDBMapper;
@@ -26,6 +27,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.sabianrobi.frameshelf.utility.Helper.verifyUserHasAccessToList;
+
 @Service
 public class ListService {
     @Autowired
@@ -39,7 +42,6 @@ public class ListService {
 
     @Autowired
     private PersonListRepository personListRepository;
-
 
     @Autowired
     private PersonRepository personRepository;
@@ -138,19 +140,12 @@ public class ListService {
     }
 
     public List getListById(final UUID listId, final UUID userId) {
-        // Try to find as MovieList first
-        final Optional<MovieList> movieList = movieListRepository.findById(listId);
-        if (movieList.isPresent() && movieList.get().getUser().getId().equals(userId)) {
-            return movieList.get();
-        }
+        final List list = listRepository.findById(listId)
+                .orElseThrow(() -> new NotFoundException("List not found"));
 
-        // Try to find as ActorList
-        final Optional<PersonList> actorList = personListRepository.findById(listId);
-        if (actorList.isPresent() && actorList.get().getUser().getId().equals(userId)) {
-            return actorList.get();
-        }
+        verifyUserHasAccessToList(userId, list);
 
-        throw new RuntimeException("List not found or user doesn't have access");
+        return list;
     }
 
     @Transactional

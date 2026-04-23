@@ -1,5 +1,6 @@
 package com.sabianrobi.frameshelf.utility;
 
+import com.sabianrobi.frameshelf.entity.List;
 import com.sabianrobi.frameshelf.entity.User;
 import com.sabianrobi.frameshelf.error.Exception.NotAuthorizedException;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
@@ -39,10 +40,23 @@ public abstract class Helper {
      * @param customOAuth2User The authenticated user
      * @param userId           The user ID to check against the authenticated user
      */
-    public static void verifyUserHasAccessToList(final CustomOAuth2User customOAuth2User, final UUID userId) {
+    public static void verifyUserHasAccessToList(final UUID userId, final CustomOAuth2User customOAuth2User) {
         // Verify the authenticated user matches the user given as the path parameter
         final User user = customOAuth2User.getUser();
+
         if (!user.getId().equals(userId)) {
+            throw new NotAuthorizedException("User is not authorized to access the list(s)");
+        }
+    }
+
+    /**
+     * Verifies that the authenticated user is the same as the list's owner
+     *
+     * @param userId The user ID to check against the authenticated user
+     * @param list   The list to check access for
+     */
+    public static void verifyUserHasAccessToList(final UUID userId, final List list) {
+        if (!userId.equals(list.getUser().getId())) {
             throw new NotAuthorizedException("User is not authorized to access the list(s)");
         }
     }

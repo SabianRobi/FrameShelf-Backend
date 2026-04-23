@@ -4,9 +4,7 @@ import com.sabianrobi.frameshelf.entity.List;
 import com.sabianrobi.frameshelf.entity.User;
 import com.sabianrobi.frameshelf.entity.request.*;
 import com.sabianrobi.frameshelf.entity.response.ListResponse;
-import com.sabianrobi.frameshelf.error.Exception.NotAuthorizedException;
-import com.sabianrobi.frameshelf.mapper.MovieMapper;
-import com.sabianrobi.frameshelf.mapper.PersonMapper;
+import com.sabianrobi.frameshelf.mapper.ListMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.ListService;
 import com.sabianrobi.frameshelf.utility.Helper;
@@ -33,10 +31,7 @@ public class ListController {
     private ListService listService;
 
     @Autowired
-    private MovieMapper movieMapper;
-
-    @Autowired
-    private PersonMapper personMapper;
+    private ListMapper listMapper;
 
     // ----- List Endpoints -----
 
@@ -46,7 +41,7 @@ public class ListController {
             @ModelAttribute final GetUserListsRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User,
             @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) final Pageable pageable) {
-        verifyUserHasAccessToList(customOAuth2User, userId);
+        verifyUserHasAccessToList(userId, customOAuth2User);
 
         // Sorting & Pagination
         final Set<String> allowedKeys = Set.of("name", "createdAt", "updatedAt");
@@ -56,7 +51,7 @@ public class ListController {
         final Page lists = listService.getUserLists(userId, request, safePageable);
 
         // Returning data
-        return lists.map(list -> ListResponse.fromList((List) list, movieMapper, personMapper));
+        return lists.map(list -> listMapper.mapListToListResponse((List) list));
     }
 
 
@@ -65,13 +60,13 @@ public class ListController {
             @PathVariable("userId") final UUID userId,
             @RequestBody final CreateListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
-        verifyUserHasAccessToList(customOAuth2User, userId);
+        verifyUserHasAccessToList(userId, customOAuth2User);
 
         try {
             final User user = customOAuth2User.getUser();
 
             final List list = listService.createList(user, request.getName(), request.getType());
-            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
+            return ResponseEntity.ok(listMapper.mapListToListResponse(list));
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -85,20 +80,15 @@ public class ListController {
     public ResponseEntity<ListResponse> getListById(
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
-            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
-        verifyUserHasAccessToList(customOAuth2User, userId);
+            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User
+    ) {
+        verifyUserHasAccessToList(userId, customOAuth2User);
 
-        try {
-            final List list = listService.getListById(listId, userId);
+        // Getting the data
+        final List list = listService.getListById(listId, userId);
 
-            return ResponseEntity.ok(ListResponse.fromList(list, movieMapper, personMapper));
-        } catch (final IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (final RuntimeException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        // Returning data
+        return ResponseEntity.ok(listMapper.mapListToListResponse(list));
     }
 
     @PatchMapping("/{userId}/lists/{listId}")
@@ -107,13 +97,13 @@ public class ListController {
             @PathVariable("listId") final UUID listId,
             @RequestBody final UpdateListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
-        verifyUserHasAccessToList(customOAuth2User, userId);
+        verifyUserHasAccessToList(userId, customOAuth2User);
 
         try {
             final User user = customOAuth2User.getUser();
 
             final List updatedList = listService.updateList(listId, request, user.getId());
-            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
+            return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -128,7 +118,7 @@ public class ListController {
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
-        verifyUserHasAccessToList(customOAuth2User, userId);
+        verifyUserHasAccessToList(userId, customOAuth2User);
 
         try {
             final User user = customOAuth2User.getUser();
@@ -152,13 +142,13 @@ public class ListController {
             @PathVariable("listId") final UUID listId,
             @RequestBody final AddItemToListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
-        verifyUserHasAccessToList(customOAuth2User, userId);
+        verifyUserHasAccessToList(userId, customOAuth2User);
 
         try {
             final User user = customOAuth2User.getUser();
 
             final List updatedList = listService.addItemToList(listId, request, user.getId());
-            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
+            return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -176,13 +166,13 @@ public class ListController {
             @PathVariable("itemId") final UUID itemId,
             @RequestBody final EditItemInListRequest request,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
-        verifyUserHasAccessToList(customOAuth2User, userId);
+        verifyUserHasAccessToList(userId, customOAuth2User);
 
         try {
             final User user = customOAuth2User.getUser();
 
             final List updatedList = listService.editItemInList(listId, itemId, request, user.getId());
-            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
+            return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -198,13 +188,13 @@ public class ListController {
             @PathVariable("listId") final UUID listId,
             @PathVariable("itemId") final UUID itemId,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
-        verifyUserHasAccessToList(customOAuth2User, userId);
+        verifyUserHasAccessToList(userId, customOAuth2User);
 
         try {
             final User user = customOAuth2User.getUser();
 
             final List updatedList = listService.removeItemFromList(listId, itemId, user.getId());
-            return ResponseEntity.ok(ListResponse.fromList(updatedList, movieMapper, personMapper));
+            return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
         } catch (final IllegalArgumentException e) {
             System.err.println(e.getMessage());
             return ResponseEntity.badRequest().build();

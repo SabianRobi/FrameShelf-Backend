@@ -2,6 +2,7 @@ package com.sabianrobi.frameshelf.service;
 
 import com.sabianrobi.frameshelf.entity.response.SearchMoviesResponse;
 import com.sabianrobi.frameshelf.entity.response.SearchPeopleResponse;
+import com.sabianrobi.frameshelf.error.exception.ThirdPartyException;
 import com.sabianrobi.frameshelf.mapper.TMDBMapper;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbSearch;
@@ -28,21 +29,6 @@ public class TMDBService {
     final private String language = "en-US";
 
     @Autowired
-    private GenreService genreService;
-
-    @Autowired
-    private CollectionService collectionService;
-
-    @Autowired
-    private ProductionCompanyService productionCompanyService;
-
-    @Autowired
-    private ProductionCountryService productionCountryService;
-
-    @Autowired
-    private SpokenLanguageService spokenLanguageService;
-
-    @Autowired
     private TMDBMapper tmdbMapper;
 
     @Autowired
@@ -54,9 +40,15 @@ public class TMDBService {
     //    Movies
     // ------------
 
-    public Page<SearchMoviesResponse> searchMovies(final String query, final int page) throws TmdbException {
+    public Page<SearchMoviesResponse> searchMovies(final String query, final int page) {
         final TmdbSearch tmdbSearch = tmdbApi.getSearch();
-        final MovieResultsPage searchResult = tmdbSearch.searchMovie(query, true, language, null, page, null, null);
+        final MovieResultsPage searchResult;
+
+        try {
+            searchResult = tmdbSearch.searchMovie(query, true, language, null, page, null, null);
+        } catch (final TmdbException e) {
+            throw new ThirdPartyException(e.getMessage());
+        }
 
         final List<SearchMoviesResponse> movieResults = searchResult.getResults().stream().map(movie -> tmdbMapper.mapTMDBMovieToSearchMoviesResponse(movie)).toList();
 
@@ -64,17 +56,31 @@ public class TMDBService {
         return new PageImpl<>(movieResults, pageable, searchResult.getTotalResults());
     }
 
-    public MovieDb searchMovie(final Integer movieId) throws TmdbException {
-        return tmdbApi.getMovies().getDetails(movieId, language, MovieAppendToResponse.CREDITS);
+    public MovieDb searchMovie(final Integer movieId) {
+        final MovieDb movieDb;
+
+        try {
+            movieDb = tmdbApi.getMovies().getDetails(movieId, language, MovieAppendToResponse.CREDITS);
+        } catch (final TmdbException e) {
+            throw new ThirdPartyException(e.getMessage());
+        }
+
+        return movieDb;
     }
 
     // ------------
     //    People
     // ------------
 
-    public Page<SearchPeopleResponse> searchPeople(final String query, final int page) throws TmdbException {
+    public Page<SearchPeopleResponse> searchPeople(final String query, final int page) {
         final TmdbSearch tmdbSearch = tmdbApi.getSearch();
-        final PopularPersonResultsPage searchResult = tmdbSearch.searchPerson(query, true, language, page);
+        final PopularPersonResultsPage searchResult;
+
+        try {
+            searchResult = tmdbSearch.searchPerson(query, true, language, page);
+        } catch (final TmdbException e) {
+            throw new ThirdPartyException(e.getMessage());
+        }
 
         final List<SearchPeopleResponse> movieResults = searchResult.getResults().stream().map(person -> tmdbMapper.mapTMDBPopularPersonToSearchPersonResponse(person)).toList();
 
@@ -82,8 +88,16 @@ public class TMDBService {
         return new PageImpl<>(movieResults, pageable, searchResult.getTotalResults());
     }
 
-    public PersonDb searchPerson(final Integer personId) throws TmdbException {
-        return tmdbApi.getPeople().getDetails(personId, language, PersonAppendToResponse.MOVIE_CREDITS, PersonAppendToResponse.TV_CREDITS);
+    public PersonDb searchPerson(final Integer personId) {
+        final PersonDb personDb;
+
+        try {
+            personDb = tmdbApi.getPeople().getDetails(personId, language, PersonAppendToResponse.MOVIE_CREDITS, PersonAppendToResponse.TV_CREDITS);
+        } catch (final TmdbException e) {
+            throw new ThirdPartyException(e.getMessage());
+        }
+
+        return personDb;
     }
 
     // Should be moved to MovieService, just the query to TMDB should remain here

@@ -1,5 +1,6 @@
 package com.sabianrobi.frameshelf.entity.request;
 
+import com.sabianrobi.frameshelf.entity.ListType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -16,5 +17,5 @@ public class CreateListRequest {
     private String name;
 
     @NotNull
-    private String type; // "MOVIE" or "PERSON"
+    private ListType type;
 }

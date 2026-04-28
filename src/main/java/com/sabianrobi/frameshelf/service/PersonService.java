@@ -67,7 +67,7 @@ public class PersonService {
 //            actor = tmdbService.createActor(createActorRequest.getId());
 //            repository.save(actor);
 //        } catch (final TmdbException e) {
-//            throw new RuntimeException(e);
+//            throw new ThirdPartyException(e.getMessage());
 //        }
 //
 //        return actorMapper.mapActorToActorResponse(actor);
@@ -82,7 +82,7 @@ public class PersonService {
 //        try {
 //            return tmdbService.searchActor(query, page);
 //        } catch (TmdbException e) {
-//            throw new RuntimeException(e);
+//            throw new ThirdPartyException(e.getMessage());
 //        }
 //    }
 

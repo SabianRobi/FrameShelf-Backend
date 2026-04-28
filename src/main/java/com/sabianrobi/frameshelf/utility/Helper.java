@@ -2,7 +2,7 @@ package com.sabianrobi.frameshelf.utility;
 
 import com.sabianrobi.frameshelf.entity.List;
 import com.sabianrobi.frameshelf.entity.User;
-import com.sabianrobi.frameshelf.error.Exception.NotAuthorizedException;
+import com.sabianrobi.frameshelf.error.exception.NotAuthorizedException;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.PageRequest;
@@ -45,7 +45,7 @@ public abstract class Helper {
         final User user = customOAuth2User.getUser();
 
         if (!user.getId().equals(userId)) {
-            throw new NotAuthorizedException("User is not authorized to access the list(s)");
+            throw new NotAuthorizedException("User is not authorized to access this list");
         }
     }
 
@@ -57,7 +57,7 @@ public abstract class Helper {
      */
     public static void verifyUserHasAccessToList(final UUID userId, final List list) {
         if (!userId.equals(list.getUser().getId())) {
-            throw new NotAuthorizedException("User is not authorized to access the list(s)");
+            throw new NotAuthorizedException("User is not authorized to access this list");
         }
     }
 }

@@ -64,7 +64,7 @@ public class MovieService {
 //        try {
 //            return tmdbService.getMovieCredits(movieId);
 //        } catch (final TmdbException e) {
-//            throw new RuntimeException(e);
+//            throw new ThirdPartyException(e.getMessage());
 //        }
 //    }
 //
@@ -85,7 +85,7 @@ public class MovieService {
 //            movie = tmdbService.createMovie(createMovieRequest.getId(), createMovieRequest.getWatchedLanguage(), createMovieRequest.getWatchedAt());
 //            repository.save(movie);
 //        } catch (final TmdbException e) {
-//            throw new RuntimeException(e);
+//            throw new ThirdPartyException(e.getMessage());
 //        }
 //
 //        return movieMapper.mapMovieToMovieResponse(movie);

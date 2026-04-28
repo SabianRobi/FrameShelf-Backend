@@ -1,4 +1,4 @@
-package com.sabianrobi.frameshelf.error.Exception;
+package com.sabianrobi.frameshelf.error.exception;
 
 public class NotAuthorizedException extends RuntimeException {
     public NotAuthorizedException(final String message) {

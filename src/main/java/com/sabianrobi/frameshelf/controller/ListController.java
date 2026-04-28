@@ -61,18 +61,10 @@ public class ListController {
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         verifyUserHasAccessToList(userId, customOAuth2User);
 
-        try {
-            final User user = customOAuth2User.getUser();
+        final User user = customOAuth2User.getUser();
 
-            final List list = listService.createList(user, request.getName(), request.getType());
-            return ResponseEntity.ok(listMapper.mapListToListResponse(list));
-        } catch (final IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (final RuntimeException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        final List list = listService.createList(user, request.getName(), request.getType());
+        return ResponseEntity.ok(listMapper.mapListToListResponse(list));
     }
 
     @GetMapping("/{userId}/lists/{listId}")
@@ -98,18 +90,11 @@ public class ListController {
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         verifyUserHasAccessToList(userId, customOAuth2User);
 
-        try {
-            final User user = customOAuth2User.getUser();
+        final User user = customOAuth2User.getUser();
 
-            final List updatedList = listService.updateList(listId, request, user.getId());
-            return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
-        } catch (final IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (final RuntimeException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        final List updatedList = listService.updateList(listId, request, user.getId());
+        return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
+
     }
 
     @DeleteMapping("/{userId}/lists/{listId}")
@@ -119,17 +104,10 @@ public class ListController {
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         verifyUserHasAccessToList(userId, customOAuth2User);
 
-        try {
-            final User user = customOAuth2User.getUser();
+        final User user = customOAuth2User.getUser();
 
-            listService.deleteList(listId, user.getId());
-            return ResponseEntity.noContent().build();
-        } catch (final IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (final RuntimeException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        listService.deleteList(listId, user.getId());
+
+        return ResponseEntity.noContent().build();
     }
 }

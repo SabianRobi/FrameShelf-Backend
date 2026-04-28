@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,7 +28,7 @@ import static com.sabianrobi.frameshelf.utility.Helper.verifyUserHasAccessToList
 @RestController
 @RequestMapping("/api/v1/user")
 public class ListItemController {
-    
+
     @Autowired
     private ListItemService listItemService;
 
@@ -85,19 +84,11 @@ public class ListItemController {
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         verifyUserHasAccessToList(userId, customOAuth2User);
 
-        try {
-            final User user = customOAuth2User.getUser();
+        final User user = customOAuth2User.getUser();
 
-            final List updatedList = listItemService.addItemToList(listId, request, user.getId());
-            return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
-        } catch (final IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (final RuntimeException e) {
-            System.err.println(e.getMessage());
-            System.err.println(Arrays.toString(e.getStackTrace()));
-            return ResponseEntity.notFound().build();
-        }
+        final List updatedList = listItemService.addItemToList(listId, request, user.getId());
+
+        return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
     }
 
     @PatchMapping("/{userId}/lists/{listId}/items/{itemId}")
@@ -109,18 +100,10 @@ public class ListItemController {
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         verifyUserHasAccessToList(userId, customOAuth2User);
 
-        try {
-            final User user = customOAuth2User.getUser();
+        final User user = customOAuth2User.getUser();
 
-            final List updatedList = listItemService.editItemInList(listId, itemId, request, user.getId());
-            return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
-        } catch (final IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (final RuntimeException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        final List updatedList = listItemService.editItemInList(listId, itemId, request, user.getId());
+        return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
     }
 
     @DeleteMapping("/{userId}/lists/{listId}/items/{itemId}")
@@ -131,17 +114,9 @@ public class ListItemController {
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         verifyUserHasAccessToList(userId, customOAuth2User);
 
-        try {
-            final User user = customOAuth2User.getUser();
+        final User user = customOAuth2User.getUser();
 
-            final List updatedList = listItemService.removeItemFromList(listId, itemId, user.getId());
-            return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
-        } catch (final IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (final RuntimeException e) {
-            System.err.println(e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
+        final List updatedList = listItemService.removeItemFromList(listId, itemId, user.getId());
+        return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
     }
 }

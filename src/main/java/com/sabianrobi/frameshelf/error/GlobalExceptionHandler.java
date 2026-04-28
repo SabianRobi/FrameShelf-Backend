@@ -1,6 +1,7 @@
 package com.sabianrobi.frameshelf.error;
 
-import com.sabianrobi.frameshelf.error.Exception.NotAuthorizedException;
+import com.sabianrobi.frameshelf.error.exception.NotAuthorizedException;
+import com.sabianrobi.frameshelf.error.exception.ThirdPartyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,15 +11,15 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(final NoResourceFoundException exception) {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(final IllegalArgumentException ex) {
         final ErrorResponse error = new ErrorResponse(
-                404,
-                "Not Found",
-                exception.getMessage()
+                400,
+                "Bad Request",
+                ex.getMessage()
         );
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(NotAuthorizedException.class)
@@ -33,14 +34,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(final IllegalArgumentException ex) {
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(final NoResourceFoundException exception) {
         final ErrorResponse error = new ErrorResponse(
-                400,
-                "Bad Request",
+                404,
+                "Not Found",
+                exception.getMessage()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ThirdPartyException.class)
+    public ResponseEntity<ErrorResponse> handleThirdPartyException(final ThirdPartyException ex) {
+        final ErrorResponse error = new ErrorResponse(
+                503,
+                "Service Unavailable",
                 ex.getMessage()
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
     }
 }

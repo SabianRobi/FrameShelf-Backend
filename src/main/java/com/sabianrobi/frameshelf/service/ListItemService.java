@@ -5,6 +5,7 @@ import com.sabianrobi.frameshelf.entity.movie.*;
 import com.sabianrobi.frameshelf.entity.person.*;
 import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
+import com.sabianrobi.frameshelf.error.exception.NotFoundException;
 import com.sabianrobi.frameshelf.mapper.CreditMapper;
 import com.sabianrobi.frameshelf.mapper.MovieCreditMapper;
 import com.sabianrobi.frameshelf.mapper.TMDBMapper;
@@ -12,7 +13,6 @@ import com.sabianrobi.frameshelf.mapper.TvCreditMapper;
 import com.sabianrobi.frameshelf.repository.*;
 import info.movito.themoviedbapi.model.movies.MovieDb;
 import info.movito.themoviedbapi.model.people.PersonDb;
-import info.movito.themoviedbapi.tools.TmdbException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +23,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import static com.sabianrobi.frameshelf.utility.Helper.verifyUserHasAccessToList;
 
 @Service
 public class ListItemService {
@@ -113,11 +115,11 @@ public class ListItemService {
     public List addItemToList(final UUID listId, final AddItemToListRequest request, final UUID userId) {
         // Try MovieList first
         final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
+
         if (movieListOpt.isPresent()) {
             final MovieList movieList = movieListOpt.get();
-            if (!movieList.getUser().getId().equals(userId)) {
-                throw new RuntimeException("User doesn't have access to this list");
-            }
+
+            verifyUserHasAccessToList(userId, movieList);
 
             final MovieInList movieInList = createMovieInList(request, movieList);
 
@@ -125,12 +127,13 @@ public class ListItemService {
             return movieListRepository.save(movieList);
         }
 
+        // Try PersonList
         final Optional<PersonList> personListOpt = personListRepository.findById(listId);
+
         if (personListOpt.isPresent()) {
             final PersonList personList = personListOpt.get();
-            if (!personList.getUser().getId().equals(userId)) {
-                throw new RuntimeException("User doesn't have access to this list");
-            }
+
+            verifyUserHasAccessToList(userId, personList);
 
             final PersonInList personInList = createPersonInList(request, personList);
 
@@ -138,7 +141,7 @@ public class ListItemService {
             return personListRepository.save(personList);
         }
 
-        throw new RuntimeException("List not found");
+        throw new NotFoundException("List not found");
     }
 
     @Transactional
@@ -154,9 +157,9 @@ public class ListItemService {
             return editMovieInList(movieList, itemId, request, listId);
         } else if (personList != null) {
             return editPersonInList(personList, itemId, request, listId);
-        } else {
-            throw new RuntimeException("List not found");
         }
+
+        throw new NotFoundException("List not found");
     }
 
     @Transactional
@@ -181,9 +184,10 @@ public class ListItemService {
             personInListRepository.delete(personInList);
 
             return personListRepository.save(personList);
-        } else {
-            throw new RuntimeException("List not found");
         }
+
+
+        throw new NotFoundException("List not found");
     }
 
     // ----- Helper methods -----
@@ -208,12 +212,7 @@ public class ListItemService {
         }
 
         // 2. Fetch movie details from external API (omitted here)
-        MovieDb movieDb;
-        try {
-            movieDb = tmdbService.searchMovie(itemId);
-        } catch (final TmdbException e) {
-            throw new RuntimeException(e);
-        }
+        final MovieDb movieDb = tmdbService.searchMovie(itemId);
 
         // 3. Create Movie object in db with all related entities
         final Collection belongsToCollection =
@@ -319,13 +318,7 @@ public class ListItemService {
         }
 
         // 2. Fetch person details from external API (omitted here)
-        PersonDb personDb;
-        try {
-            personDb = tmdbService.searchPerson(itemId);
-        } catch (final TmdbException e) {
-            throw new RuntimeException(e);
-        }
-
+        final PersonDb personDb = tmdbService.searchPerson(itemId);
 
         // 3. Create Person object in db with all related entities
         // MovieCredits
@@ -390,9 +383,8 @@ public class ListItemService {
 
         if (movieListOpt.isPresent()) {
             movieList = movieListOpt.get();
-            if (!movieList.getUser().getId().equals(userId)) {
-                throw new RuntimeException("User doesn't have access to this list");
-            }
+
+            verifyUserHasAccessToList(userId, movieList);
         }
         return movieList;
     }
@@ -404,10 +396,10 @@ public class ListItemService {
 
         if (personListOpt.isPresent()) {
             personList = personListOpt.get();
-            if (!personList.getUser().getId().equals(userId)) {
-                throw new RuntimeException("User doesn't have access to this list");
-            }
+
+            verifyUserHasAccessToList(userId, personList);
         }
+
         return personList;
     }
 
@@ -419,12 +411,12 @@ public class ListItemService {
         if (movieList.getMovies().stream().noneMatch(
                 movieInList -> movieInList.getId().equals(itemId)
         )) {
-            throw new RuntimeException("Item not found in list");
+            throw new NotFoundException("Item not found in list");
         }
 
         // Fetch the MovieInList entity
         final MovieInList movieInList = movieInListRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found in list"));
+                .orElseThrow(() -> new NotFoundException("Item not found in list"));
 
         // Edit the fields
         if (request.getNotes() != null) {
@@ -440,7 +432,7 @@ public class ListItemService {
 
         // Fetch the updated list to ensure it contains the newly updated item
         return movieListRepository.findById(listId)
-                .orElseThrow(() -> new RuntimeException("List not found after update"));
+                .orElseThrow(() -> new NotFoundException("List not found after update"));
     }
 
     private PersonList editPersonInList(final PersonList personList,
@@ -451,12 +443,12 @@ public class ListItemService {
         if (personList.getPeople().stream().noneMatch(
                 personInList -> personInList.getId().equals(itemId)
         )) {
-            throw new RuntimeException("Item not found in list");
+            throw new NotFoundException("Item not found in list");
         }
 
         // Fetch the MovieInList entity
         final PersonInList personInList = personInListRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found in list"));
+                .orElseThrow(() -> new NotFoundException("Item not found in list"));
 
         // Edit the fields
         if (request.getNotes() != null) {
@@ -468,7 +460,7 @@ public class ListItemService {
 
         // Fetch the updated list to ensure it contains the newly updated item
         return personListRepository.findById(listId)
-                .orElseThrow(() -> new RuntimeException("List not found after update"));
+                .orElseThrow(() -> new NotFoundException("List not found after update"));
     }
 
     private MovieInList getMovieInList(final MovieList movieList, final UUID itemId) {
@@ -476,12 +468,12 @@ public class ListItemService {
         if (movieList.getMovies().stream().noneMatch(
                 movieInList -> movieInList.getId().equals(itemId)
         )) {
-            throw new RuntimeException("Item not found in list");
+            throw new NotFoundException("Item not found in list");
         }
 
         // Fetch the MovieInList entity
         return movieInListRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found in list"));
+                .orElseThrow(() -> new NotFoundException("Item not found in list"));
     }
 
     private PersonInList getPersonInList(final PersonList personList, final UUID itemId) {
@@ -489,11 +481,11 @@ public class ListItemService {
         if (personList.getPeople().stream().noneMatch(
                 movieInList -> movieInList.getId().equals(itemId)
         )) {
-            throw new RuntimeException("Item not found in list");
+            throw new NotFoundException("Item not found in list");
         }
 
         // Fetch the MovieInList entity
         return personInListRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found in list"));
+                .orElseThrow(() -> new NotFoundException("Item not found in list"));
     }
 }

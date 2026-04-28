@@ -1,4 +1,4 @@
-package com.sabianrobi.frameshelf.entity.request;
+package com.sabianrobi.frameshelf.entity.request.params;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetUserListsRequest {
-    private String type = ""; // Optional: "MOVIE" or "PERSON", null returns both
+public class GetUserListsParams {
+    private String type; // Optional: "MOVIE" or "PERSON"
     private String name = ""; // Optional: filters lists by name (case-insensitive contains
 }

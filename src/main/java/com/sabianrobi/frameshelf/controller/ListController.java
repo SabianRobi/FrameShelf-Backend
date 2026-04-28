@@ -1,10 +1,16 @@
 package com.sabianrobi.frameshelf.controller;
 
-import com.sabianrobi.frameshelf.entity.List;
-import com.sabianrobi.frameshelf.entity.User;
-import com.sabianrobi.frameshelf.entity.request.*;
+import com.sabianrobi.frameshelf.entity.*;
+import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
+import com.sabianrobi.frameshelf.entity.request.CreateListRequest;
+import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
+import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
+import com.sabianrobi.frameshelf.entity.request.params.GetListItemsParams;
+import com.sabianrobi.frameshelf.entity.request.params.GetUserListsParams;
 import com.sabianrobi.frameshelf.entity.response.ListResponse;
 import com.sabianrobi.frameshelf.mapper.ListMapper;
+import com.sabianrobi.frameshelf.mapper.MovieMapper;
+import com.sabianrobi.frameshelf.mapper.PersonMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.ListService;
 import com.sabianrobi.frameshelf.utility.Helper;
@@ -33,12 +39,18 @@ public class ListController {
     @Autowired
     private ListMapper listMapper;
 
+    @Autowired
+    private MovieMapper movieMapper;
+
+    @Autowired
+    private PersonMapper personMapper;
+
     // ----- List Endpoints -----
 
     @GetMapping("/{userId}/lists")
     public Page getUserLists(
             @PathVariable("userId") final UUID userId,
-            @ModelAttribute final GetUserListsRequest request,
+            @ModelAttribute final GetUserListsParams params,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User,
             @PageableDefault(sort = "updatedAt", direction = Sort.Direction.DESC) final Pageable pageable) {
         verifyUserHasAccessToList(userId, customOAuth2User);
@@ -48,7 +60,7 @@ public class ListController {
         final Pageable safePageable = Helper.getSafePageable(pageable, allowedKeys);
 
         // Getting the data
-        final Page lists = listService.getUserLists(userId, request, safePageable);
+        final Page lists = listService.getUserLists(userId, params, safePageable);
 
         // Returning data
         return lists.map(list -> listMapper.mapListToListResponse((List) list));
@@ -135,6 +147,41 @@ public class ListController {
     }
 
     // ----- List Item Endpoints -----
+
+    @GetMapping("/{userId}/lists/{listId}/items")
+    public Page getItemsInList(
+            @PathVariable("userId") final UUID userId,
+            @PathVariable("listId") final UUID listId,
+            @ModelAttribute final GetListItemsParams params,
+            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User,
+            @PageableDefault(sort = "addedAt", direction = Sort.Direction.DESC) final Pageable pageable
+    ) {
+        verifyUserHasAccessToList(userId, customOAuth2User);
+
+        if (params.getType() == ListType.MOVIE) {
+            // Sorting & Pagination
+            final Set<String> allowedKeys = Set.of("notes", "addedAt", "watchedAt", "createdAt", "updatedAt");
+            final Pageable safePageable = Helper.getSafePageable(pageable, allowedKeys);
+
+            // Getting the data
+            final Page<MovieInList> movies = listService.getMovieListItems(userId, listId, safePageable);
+
+            // Returning data
+            return movies.map(movieMapper::mapMovieInListToMovieInListResponse);
+        } else if (params.getType() == ListType.PERSON) {
+            // Sorting & Pagination
+            final Set<String> allowedKeys = Set.of("notes", "addedAt", "createdAt", "updatedAt");
+            final Pageable safePageable = Helper.getSafePageable(pageable, allowedKeys);
+
+            // Getting the data
+            final Page<PersonInList> lists = listService.getPersonListItems(userId, listId, safePageable);
+
+            // Returning data
+            return lists.map(personMapper::mapPersonInListToPersonInListResponse);
+        }
+
+        throw new IllegalArgumentException("Invalid list type");
+    }
 
     @PostMapping("/{userId}/lists/{listId}/items")
     public ResponseEntity<ListResponse> addItemToList(

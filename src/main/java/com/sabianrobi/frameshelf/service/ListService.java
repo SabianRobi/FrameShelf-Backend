@@ -5,8 +5,8 @@ import com.sabianrobi.frameshelf.entity.movie.*;
 import com.sabianrobi.frameshelf.entity.person.*;
 import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
-import com.sabianrobi.frameshelf.entity.request.GetUserListsRequest;
 import com.sabianrobi.frameshelf.entity.request.UpdateListRequest;
+import com.sabianrobi.frameshelf.entity.request.params.GetUserListsParams;
 import com.sabianrobi.frameshelf.error.Exception.NotFoundException;
 import com.sabianrobi.frameshelf.mapper.CreditMapper;
 import com.sabianrobi.frameshelf.mapper.MovieCreditMapper;
@@ -111,32 +111,27 @@ public class ListService {
 
     // ----- List operations -----
 
-    public Page getUserLists(final UUID userId, final GetUserListsRequest request, final Pageable pageable) {
+    public Page getUserLists(final UUID userId, final GetUserListsParams params, final Pageable pageable) {
         // Determine the type of list to fetch based on the request
-        final String type = request.getType().isBlank() ? "ALL" : request.getType();
-        final String nameFilter = request.getName().isBlank() ? null : request.getName();
+        final String type = params.getType();
+        final String nameFilter = params.getName().isBlank() ? null : params.getName();
 
         // Determine whether to filter by name
         final boolean hasNameFilter = nameFilter != null && !nameFilter.trim().isEmpty();
 
-        switch (type) {
-            case "MOVIE" -> {
-                return hasNameFilter
-                        ? movieListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter, pageable)
-                        : movieListRepository.findByUserId(userId, pageable);
-            }
-            case "PERSON" -> {
-                return hasNameFilter
-                        ? personListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter, pageable)
-                        : personListRepository.findByUserId(userId, pageable);
-            }
-            case "ALL" -> {
-                return hasNameFilter
-                        ? listRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter, pageable)
-                        : listRepository.findByUserId(userId, pageable);
-            }
-            default -> throw new IllegalArgumentException("Invalid list type");
+        if (type == null) {
+            return listRepository.findByUserId(userId, pageable);
+        } else if (type.equalsIgnoreCase("movie")) {
+            return hasNameFilter
+                    ? movieListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter, pageable)
+                    : movieListRepository.findByUserId(userId, pageable);
+        } else if (type.equalsIgnoreCase("person")) {
+            return hasNameFilter
+                    ? personListRepository.findByUserIdAndNameContainingIgnoreCase(userId, nameFilter, pageable)
+                    : personListRepository.findByUserId(userId, pageable);
         }
+
+        throw new IllegalArgumentException("Invalid list type");
     }
 
     public List getListById(final UUID listId, final UUID userId) {
@@ -222,6 +217,14 @@ public class ListService {
     }
 
     // ----- List item operations -----
+
+    public Page<MovieInList> getMovieListItems(final UUID userId, final UUID listId, final Pageable pageable) {
+        return movieInListRepository.findByListId(listId, pageable);
+    }
+
+    public Page<PersonInList> getPersonListItems(final UUID userId, final UUID listId, final Pageable pageable) {
+        return personInListRepository.findByListId(listId, pageable);
+    }
 
     @Transactional
     public List addItemToList(final UUID listId, final AddItemToListRequest request, final UUID userId) {

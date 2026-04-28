@@ -25,5 +25,5 @@ public class MovieInList extends BaseEntity {
     private LocalDateTime addedAt;
     private String notes;
     private LocalDateTime watchedAt;
-    // watchedLanguage
+    private Language watchedLanguage;
 }

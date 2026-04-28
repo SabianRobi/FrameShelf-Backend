@@ -22,4 +22,15 @@ public abstract class List extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Transient
+    public ListType getListType() {
+        if (this instanceof MovieList) {
+            return ListType.MOVIE;
+        } else if (this instanceof PersonList) {
+            return ListType.PERSON;
+        }
+        
+        return null;
+    }
 }

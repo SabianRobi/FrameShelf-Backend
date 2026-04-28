@@ -10,6 +10,7 @@ public class ListMapper {
         return ListResponse.builder()
                 .id(list.getId())
                 .name(list.getName())
+                .type(list.getListType())
                 .userId(list.getUser() != null ? list.getUser().getId() : null)
                 .createdAt(list.getCreatedAt())
                 .updatedAt(list.getUpdatedAt())

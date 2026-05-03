@@ -1,6 +1,7 @@
 package com.sabianrobi.frameshelf.error;
 
 import com.sabianrobi.frameshelf.error.exception.NotAuthorizedException;
+import com.sabianrobi.frameshelf.error.exception.NotFoundException;
 import com.sabianrobi.frameshelf.error.exception.ThirdPartyException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -8,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -32,8 +32,8 @@ public class GlobalExceptionHandler {
         return getResponseEntity(HttpStatus.FORBIDDEN, ex);
     }
 
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(final NoResourceFoundException ex) {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(final NotFoundException ex) {
         return getResponseEntity(HttpStatus.NOT_FOUND, ex);
     }
 

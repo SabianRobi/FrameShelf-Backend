@@ -104,10 +104,20 @@ public class ListItemService {
     private TvCreditRepository tvCreditRepository;
 
     public Page<MovieInList> getMovieListItems(final UUID userId, final UUID listId, final Pageable pageable) {
+        final MovieList movieList = movieListRepository.findById(listId)
+                .orElseThrow(() -> new NotFoundException("Movie list not found"));
+
+        verifyUserHasAccessToList(userId, movieList);
+
         return movieInListRepository.findByListId(listId, pageable);
     }
 
     public Page<PersonInList> getPersonListItems(final UUID userId, final UUID listId, final Pageable pageable) {
+        final PersonList personList = personListRepository.findById(listId)
+                .orElseThrow(() -> new NotFoundException("Person list not found"));
+
+        verifyUserHasAccessToList(userId, personList);
+
         return personInListRepository.findByListId(listId, pageable);
     }
 

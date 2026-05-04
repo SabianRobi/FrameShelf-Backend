@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -29,10 +30,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageConversionException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(final HttpMessageConversionException ex) {
+    public ResponseEntity<ErrorResponse> handleHttpMessageConversionException(final HttpMessageConversionException ex) {
         return getResponseEntity(HttpStatus.BAD_REQUEST, ex);
     }
 
+    // Thrown when a required query parameter is missing
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(final MissingServletRequestParameterException ex) {
+        return getResponseEntity(HttpStatus.BAD_REQUEST, ex);
+    }
+
+    // Jackson polymorphism error; like when request contains incorrect type
+    @ExceptionHandler(ClassCastException.class)
+    public ResponseEntity<ErrorResponse> handleClassCastException(final ClassCastException ex) {
+        return getResponseEntity(HttpStatus.BAD_REQUEST, ex);
+    }
 
     @ExceptionHandler(NotAuthorizedException.class)
     public ResponseEntity<ErrorResponse> handleNotAuthorized(final NotAuthorizedException ex) {

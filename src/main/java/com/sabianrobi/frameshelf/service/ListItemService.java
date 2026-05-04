@@ -175,38 +175,36 @@ public class ListItemService {
                                      final EditItemInListRequest request,
                                      final UUID userId) {
 
-        final MovieList movieList = getMovieList(listId, userId);
-        final PersonList personList = getPersonList(listId, userId);
+        if (request instanceof EditMovieInListRequest editMovieInListRequest) {
+            final MovieList movieList = getMovieList(listId, userId);
 
-        if (movieList != null) {
-            return editMovieInList(movieList, itemId, (EditMovieInListRequest) request);
-        } else if (personList != null) {
-            return editPersonInList(personList, itemId, (EditPersonInListRequest) request);
+            return editMovieInList(movieList, itemId, editMovieInListRequest);
+        } else if (request instanceof EditPersonInListRequest editPersonInListRequest) {
+            final PersonList personList = getPersonList(listId, userId);
+
+            return editPersonInList(personList, itemId, editPersonInListRequest);
+        } else {
+            throw new NotFoundException("List not found");
         }
-
-        throw new NotFoundException("List not found");
     }
 
     @Transactional
-    public void removeItemFromList(final UUID listId, final UUID itemId, final UUID userId) {
-        final MovieList movieList = getMovieList(listId, userId);
-        final PersonList personList = getPersonList(listId, userId);
-
-        if (movieList != null) {
+    public void removeItemFromList(final UUID listId, final UUID itemId, final UUID userId, final ListType type) {
+        if (type == ListType.MOVIE) {
+            final MovieList movieList = getMovieList(listId, userId);
             final MovieInList movieInList = getMovieInList(movieList, itemId);
 
             // Delete the item directly, no need to manipulate the collection
             movieInListRepository.delete(movieInList);
-
-        } else if (personList != null) {
+        } else if (type == ListType.PERSON) {
+            final PersonList personList = getPersonList(listId, userId);
             final PersonInList personInList = getPersonInList(personList, itemId);
 
             // Delete the item directly, no need to manipulate the collection
             personInListRepository.delete(personInList);
+        } else {
+            throw new NotFoundException("List not found");
         }
-
-
-        throw new NotFoundException("List not found");
     }
 
     // ----- Helper methods -----
@@ -398,28 +396,19 @@ public class ListItemService {
     }
 
     private MovieList getMovieList(final UUID listId, final UUID userId) {
-        // Verify list ownership
-        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
-        MovieList movieList = null;
+        final MovieList movieList = movieListRepository.findById(listId)
+                .orElseThrow(() -> new NotFoundException("Movie list not found"));
 
-        if (movieListOpt.isPresent()) {
-            movieList = movieListOpt.get();
+        verifyUserHasAccessToList(userId, movieList);
 
-            verifyUserHasAccessToList(userId, movieList);
-        }
         return movieList;
     }
 
     private PersonList getPersonList(final UUID listId, final UUID userId) {
-        // Verify list ownership
-        PersonList personList = null;
-        final Optional<PersonList> personListOpt = personListRepository.findById(listId);
+        final PersonList personList = personListRepository.findById(listId)
+                .orElseThrow(() -> new NotFoundException("Person list not found"));
 
-        if (personListOpt.isPresent()) {
-            personList = personListOpt.get();
-
-            verifyUserHasAccessToList(userId, personList);
-        }
+        verifyUserHasAccessToList(userId, personList);
 
         return personList;
     }

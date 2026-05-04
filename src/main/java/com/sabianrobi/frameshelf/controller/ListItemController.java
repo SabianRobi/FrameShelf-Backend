@@ -6,7 +6,6 @@ import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
 import com.sabianrobi.frameshelf.entity.request.params.GetListItemsParams;
 import com.sabianrobi.frameshelf.entity.response.ItemInListResponse;
 import com.sabianrobi.frameshelf.mapper.ItemInListMapper;
-import com.sabianrobi.frameshelf.mapper.ListMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.ListItemService;
 import com.sabianrobi.frameshelf.utility.Helper;
@@ -30,9 +29,6 @@ public class ListItemController {
 
     @Autowired
     private ListItemService listItemService;
-
-    @Autowired
-    private ListMapper listMapper;
 
     @Autowired
     private ItemInListMapper itemInListMapper;
@@ -123,12 +119,13 @@ public class ListItemController {
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
             @PathVariable("itemId") final UUID itemId,
+            @RequestParam("type") final ListType type,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
         verifyUserHasAccessToList(userId, customOAuth2User);
 
         final User user = customOAuth2User.getUser();
 
-        listItemService.removeItemFromList(listId, itemId, user.getId());
+        listItemService.removeItemFromList(listId, itemId, user.getId(), type);
         return ResponseEntity.noContent().build();
     }
 }

@@ -14,16 +14,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class MovieInList extends BaseEntity {
-
+public class MovieInList extends ItemInList {
     @ManyToOne
     private Movie movie;
 
     @ManyToOne
     private MovieList list;
 
-    private LocalDateTime addedAt;
-    private String notes;
     private LocalDateTime watchedAt;
     private Language watchedLanguage;
 }

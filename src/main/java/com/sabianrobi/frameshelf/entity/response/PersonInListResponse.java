@@ -1,16 +1,12 @@
 package com.sabianrobi.frameshelf.entity.response;
 
-import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
-public class PersonInListResponse {
-    private UUID id;
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
+public class PersonInListResponse extends ItemInListResponse {
     private PersonResponse person;
-    private LocalDateTime addedAt;
-    private String notes;
 }

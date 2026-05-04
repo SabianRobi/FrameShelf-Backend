@@ -1,7 +1,7 @@
 package com.sabianrobi.frameshelf.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sabianrobi.frameshelf.mapper.PersonMapper;
+import com.sabianrobi.frameshelf.mapper.ItemInListMapper;
 import com.sabianrobi.frameshelf.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ public class PersonService {
     private TMDBService tmdbService;
 
     @Autowired
-    private PersonMapper personMapper;
+    private ItemInListMapper itemInListMapper;
 
     @Autowired
     private ObjectMapper objectMapper;

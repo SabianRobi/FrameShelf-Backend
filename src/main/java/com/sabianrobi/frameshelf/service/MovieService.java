@@ -1,7 +1,7 @@
 package com.sabianrobi.frameshelf.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sabianrobi.frameshelf.mapper.MovieMapper;
+import com.sabianrobi.frameshelf.mapper.ItemInListMapper;
 import com.sabianrobi.frameshelf.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ public class MovieService {
     private TMDBService tmdbService;
 
     @Autowired
-    private MovieMapper movieMapper;
+    private ItemInListMapper itemInListMapper;
 
     @Autowired
     private ObjectMapper objectMapper;

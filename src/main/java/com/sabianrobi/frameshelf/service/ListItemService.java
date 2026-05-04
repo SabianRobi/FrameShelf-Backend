@@ -123,6 +123,28 @@ public class ListItemService {
         return personInListRepository.findByListId(listId, pageable);
     }
 
+    public ItemInList getItemInList(final UUID userId, final UUID listId, final UUID itemId, final ListType type) {
+        if (type == ListType.MOVIE) {
+            final MovieList movieList = movieListRepository.findById(listId)
+                    .orElseThrow(() -> new NotFoundException("Movie list not found"));
+
+            verifyUserHasAccessToList(userId, movieList);
+
+            return movieInListRepository.findById(itemId)
+                    .orElseThrow(() -> new NotFoundException("Item not found in list"));
+        } else if (type == ListType.PERSON) {
+            final PersonList personList = personListRepository.findById(listId)
+                    .orElseThrow(() -> new NotFoundException("Person list not found"));
+
+            verifyUserHasAccessToList(userId, personList);
+
+            return personInListRepository.findById(itemId)
+                    .orElseThrow(() -> new NotFoundException("Item not found in list"));
+        }
+
+        throw new NotFoundException("Type not found");
+    }
+
     @Transactional
     public List addItemToList(final UUID listId, final AddItemToListRequest request, final UUID userId) {
         if (request instanceof AddMovieToListRequest movieRequest) {

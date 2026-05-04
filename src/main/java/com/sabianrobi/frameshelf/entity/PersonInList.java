@@ -5,8 +5,6 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @Entity
@@ -14,13 +12,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class PersonInList extends BaseEntity {
+public class PersonInList extends ItemInList {
     @ManyToOne
     private Person person;
 
     @ManyToOne
     private PersonList list;
-
-    private LocalDateTime addedAt;
-    private String notes;
 }

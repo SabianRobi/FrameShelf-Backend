@@ -4,10 +4,10 @@ import com.sabianrobi.frameshelf.entity.*;
 import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
 import com.sabianrobi.frameshelf.entity.request.params.GetListItemsParams;
+import com.sabianrobi.frameshelf.entity.response.ItemInListResponse;
 import com.sabianrobi.frameshelf.entity.response.ListResponse;
+import com.sabianrobi.frameshelf.mapper.ItemInListMapper;
 import com.sabianrobi.frameshelf.mapper.ListMapper;
-import com.sabianrobi.frameshelf.mapper.MovieMapper;
-import com.sabianrobi.frameshelf.mapper.PersonMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.ListItemService;
 import com.sabianrobi.frameshelf.utility.Helper;
@@ -36,10 +36,7 @@ public class ListItemController {
     private ListMapper listMapper;
 
     @Autowired
-    private MovieMapper movieMapper;
-
-    @Autowired
-    private PersonMapper personMapper;
+    private ItemInListMapper itemInListMapper;
 
     @GetMapping("/{userId}/lists/{listId}/items")
     public Page getItemsInList(
@@ -60,7 +57,7 @@ public class ListItemController {
             final Page<MovieInList> movies = listItemService.getMovieListItems(userId, listId, safePageable);
 
             // Returning data
-            return movies.map(movieMapper::mapMovieInListToMovieInListResponse);
+            return movies.map(itemInListMapper::mapMovieInListToMovieInListResponse);
         } else if (params.getType() == ListType.PERSON) {
             // Sorting & Pagination
             final Set<String> allowedKeys = Set.of("notes", "addedAt", "createdAt", "updatedAt");
@@ -70,10 +67,26 @@ public class ListItemController {
             final Page<PersonInList> lists = listItemService.getPersonListItems(userId, listId, safePageable);
 
             // Returning data
-            return lists.map(personMapper::mapPersonInListToPersonInListResponse);
+            return lists.map(itemInListMapper::mapPersonInListToPersonInListResponse);
         }
 
         throw new IllegalArgumentException("Invalid list type");
+    }
+
+    @GetMapping("/{userId}/lists/{listId}/items/{itemId}")
+    public ResponseEntity<ItemInListResponse> getItemInList(
+            @PathVariable("userId") final UUID userId,
+            @PathVariable("listId") final UUID listId,
+            @PathVariable("itemId") final UUID itemId,
+            @RequestParam("type") final ListType type,
+            @AuthenticationPrincipal final CustomOAuth2User customOAuth2User) {
+        verifyUserHasAccessToList(userId, customOAuth2User);
+
+        final User user = customOAuth2User.getUser();
+
+        final ItemInList itemFromList = listItemService.getItemInList(user.getId(), listId, itemId, type);
+
+        return ResponseEntity.ok(itemInListMapper.mapItemInListToItemInListResponse(itemFromList));
     }
 
     @PostMapping("/{userId}/lists/{listId}/items")

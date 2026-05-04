@@ -26,6 +26,7 @@ public class ItemInListMapper {
                 .addedAt(movieInList.getAddedAt())
                 .notes(movieInList.getNotes())
                 .watchedAt(movieInList.getWatchedAt())
+                .watchedLanguage(movieInList.getWatchedLanguage())
                 .build();
     }
 

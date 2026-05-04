@@ -3,10 +3,7 @@ package com.sabianrobi.frameshelf.service;
 import com.sabianrobi.frameshelf.entity.*;
 import com.sabianrobi.frameshelf.entity.movie.*;
 import com.sabianrobi.frameshelf.entity.person.*;
-import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
-import com.sabianrobi.frameshelf.entity.request.AddMovieToListRequest;
-import com.sabianrobi.frameshelf.entity.request.AddPersonToListRequest;
-import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
+import com.sabianrobi.frameshelf.entity.request.*;
 import com.sabianrobi.frameshelf.error.exception.NotFoundException;
 import com.sabianrobi.frameshelf.mapper.CreditMapper;
 import com.sabianrobi.frameshelf.mapper.MovieCreditMapper;
@@ -182,16 +179,16 @@ public class ListItemService {
         final PersonList personList = getPersonList(listId, userId);
 
         if (movieList != null) {
-            return editMovieInList(movieList, itemId, request, listId);
+            return editMovieInList(movieList, itemId, (EditMovieInListRequest) request);
         } else if (personList != null) {
-            return editPersonInList(personList, itemId, request, listId);
+            return editPersonInList(personList, itemId, (EditPersonInListRequest) request);
         }
 
         throw new NotFoundException("List not found");
     }
 
     @Transactional
-    public List removeItemFromList(final UUID listId, final UUID itemId, final UUID userId) {
+    public void removeItemFromList(final UUID listId, final UUID itemId, final UUID userId) {
         final MovieList movieList = getMovieList(listId, userId);
         final PersonList personList = getPersonList(listId, userId);
 
@@ -201,19 +198,11 @@ public class ListItemService {
             // Delete the item directly, no need to manipulate the collection
             movieInListRepository.delete(movieInList);
 
-            // Re-fetch the list to get the updated collection
-            return movieListRepository.findById(listId)
-                    .orElseThrow(() -> new NotFoundException("Movie list not found after removing item"));
-
         } else if (personList != null) {
             final PersonInList personInList = getPersonInList(personList, itemId);
 
             // Delete the item directly, no need to manipulate the collection
             personInListRepository.delete(personInList);
-
-            // Re-fetch the list to get the updated collection
-            return personListRepository.findById(listId)
-                    .orElseThrow(() -> new NotFoundException("Person list not found after removing item"));
         }
 
 
@@ -437,18 +426,15 @@ public class ListItemService {
 
     private MovieInList editMovieInList(final MovieList movieList,
                                         final UUID itemId,
-                                        final EditItemInListRequest request,
-                                        final UUID listId) {
-        // Verify item exists in list
-        if (movieList.getMovies().stream().noneMatch(
-                movieInList -> movieInList.getId().equals(itemId)
-        )) {
-            throw new NotFoundException("Item not found in list");
-        }
-
+                                        final EditMovieInListRequest request) {
         // Fetch the MovieInList entity
         final MovieInList movieInList = movieInListRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found in list"));
+
+        // Verify the item belongs to the correct list
+        if (!movieInList.getList().getId().equals(movieList.getId())) {
+            throw new NotFoundException("Item not found in list");
+        }
 
         // Edit the fields
         if (request.getNotes() != null) {
@@ -459,24 +445,25 @@ public class ListItemService {
             movieInList.setWatchedAt(request.getWatchedAt());
         }
 
+        if (request.getWatchedLanguage() != null) {
+            movieInList.setWatchedLanguage(request.getWatchedLanguage());
+        }
+
         // Save and return
         return movieInListRepository.save(movieInList);
     }
 
     private PersonInList editPersonInList(final PersonList personList,
                                           final UUID itemId,
-                                          final EditItemInListRequest request,
-                                          final UUID listId) {
-        // Verify item exists in list
-        if (personList.getPeople().stream().noneMatch(
-                personInList -> personInList.getId().equals(itemId)
-        )) {
-            throw new NotFoundException("Item not found in list");
-        }
-
-        // Fetch the MovieInList entity
+                                          final EditPersonInListRequest request) {
+        // Fetch the PersonInList entity
         final PersonInList personInList = personInListRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found in list"));
+
+        // Verify the item belongs to the correct list
+        if (!personInList.getList().getId().equals(personList.getId())) {
+            throw new NotFoundException("Item not found in list");
+        }
 
         // Edit the fields
         if (request.getNotes() != null) {
@@ -488,28 +475,28 @@ public class ListItemService {
     }
 
     private MovieInList getMovieInList(final MovieList movieList, final UUID itemId) {
-        // Verify item exists in list
-        if (movieList.getMovies().stream().noneMatch(
-                movieInList -> movieInList.getId().equals(itemId)
-        )) {
+        // Fetch the MovieInList entity
+        final MovieInList movieInList = movieInListRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item not found in list"));
+
+        // Verify the item belongs to the correct list
+        if (!movieInList.getList().getId().equals(movieList.getId())) {
             throw new NotFoundException("Item not found in list");
         }
 
-        // Fetch the MovieInList entity
-        return movieInListRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found in list"));
+        return movieInList;
     }
 
     private PersonInList getPersonInList(final PersonList personList, final UUID itemId) {
-        // Verify item exists in list
-        if (personList.getPeople().stream().noneMatch(
-                movieInList -> movieInList.getId().equals(itemId)
-        )) {
+        // Fetch the PersonInList entity
+        final PersonInList personInList = personInListRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item not found in list"));
+
+        // Verify the item belongs to the correct list
+        if (!personInList.getList().getId().equals(personList.getId())) {
             throw new NotFoundException("Item not found in list");
         }
 
-        // Fetch the MovieInList entity
-        return personInListRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item not found in list"));
+        return personInList;
     }
 }

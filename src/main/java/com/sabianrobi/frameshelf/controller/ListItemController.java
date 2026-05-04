@@ -43,8 +43,7 @@ public class ListItemController {
             @PathVariable("listId") final UUID listId,
             @ModelAttribute final GetListItemsParams params,
             @AuthenticationPrincipal final CustomOAuth2User customOAuth2User,
-            @PageableDefault(sort = "addedAt", direction = Sort.Direction.DESC) final Pageable pageable
-    ) {
+            @PageableDefault(sort = "addedAt", direction = Sort.Direction.DESC) final Pageable pageable) {
         verifyUserHasAccessToList(userId, customOAuth2User);
 
         if (params.getType() == ListType.MOVIE) {
@@ -120,7 +119,7 @@ public class ListItemController {
     }
 
     @DeleteMapping("/{userId}/lists/{listId}/items/{itemId}")
-    public ResponseEntity removeItemFromList(
+    public ResponseEntity<Void> removeItemFromList(
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
             @PathVariable("itemId") final UUID itemId,

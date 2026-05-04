@@ -53,7 +53,6 @@ public class ListController {
         return lists.map(list -> listMapper.mapListToListResponse((List) list));
     }
 
-
     @PostMapping("/{userId}/lists")
     public ResponseEntity<ListResponse> createList(
             @PathVariable("userId") final UUID userId,

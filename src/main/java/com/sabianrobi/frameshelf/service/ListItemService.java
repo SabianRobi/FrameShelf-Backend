@@ -4,6 +4,8 @@ import com.sabianrobi.frameshelf.entity.*;
 import com.sabianrobi.frameshelf.entity.movie.*;
 import com.sabianrobi.frameshelf.entity.person.*;
 import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
+import com.sabianrobi.frameshelf.entity.request.AddMovieToListRequest;
+import com.sabianrobi.frameshelf.entity.request.AddPersonToListRequest;
 import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
 import com.sabianrobi.frameshelf.error.exception.NotFoundException;
 import com.sabianrobi.frameshelf.mapper.CreditMapper;
@@ -123,33 +125,36 @@ public class ListItemService {
 
     @Transactional
     public List addItemToList(final UUID listId, final AddItemToListRequest request, final UUID userId) {
-        // Try MovieList first
-        final Optional<MovieList> movieListOpt = movieListRepository.findById(listId);
-
-        if (movieListOpt.isPresent()) {
-            final MovieList movieList = movieListOpt.get();
+        if (request instanceof AddMovieToListRequest movieRequest) {
+            final MovieList movieList = movieListRepository.findById(listId)
+                    .orElseThrow(() -> new NotFoundException("Movie list not found"));
 
             verifyUserHasAccessToList(userId, movieList);
 
-            final MovieInList movieInList = createMovieInList(request, movieList);
+            final MovieInList movieInList = createMovieInList(movieRequest, movieList);
 
-            movieList.getMovies().add(movieInList);
-            return movieListRepository.save(movieList);
-        }
+            // Save the item separately to avoid hashCode() triggering lazy-loading during collection add
+            movieInListRepository.save(movieInList);
 
-        // Try PersonList
-        final Optional<PersonList> personListOpt = personListRepository.findById(listId);
-
-        if (personListOpt.isPresent()) {
-            final PersonList personList = personListOpt.get();
+            // Re-fetch the list to get the fresh collection
+            return movieListRepository.findById(listId)
+                    .orElseThrow(() -> new NotFoundException("Movie list not found after adding item"));
+        } else if (request instanceof AddPersonToListRequest personRequest) {
+            final PersonList personList = personListRepository.findById(listId)
+                    .orElseThrow(() -> new NotFoundException("Person list not found"));
 
             verifyUserHasAccessToList(userId, personList);
 
-            final PersonInList personInList = createPersonInList(request, personList);
+            final PersonInList personInList = createPersonInList(personRequest, personList);
 
-            personList.getPeople().add(personInList);
-            return personListRepository.save(personList);
+            // Save the item separately to avoid hashCode() triggering lazy-loading during collection add
+            personInListRepository.save(personInList);
+
+            // Re-fetch the list to get the fresh collection
+            return personListRepository.findById(listId)
+                    .orElseThrow(() -> new NotFoundException("Person list not found after adding item"));
         }
+
 
         throw new NotFoundException("List not found");
     }
@@ -180,20 +185,22 @@ public class ListItemService {
         if (movieList != null) {
             final MovieInList movieInList = getMovieInList(movieList, itemId);
 
-            // Remove the item from the list
-            movieList.getMovies().remove(movieInList);
+            // Delete the item directly, no need to manipulate the collection
             movieInListRepository.delete(movieInList);
 
-            return movieListRepository.save(movieList);
+            // Re-fetch the list to get the updated collection
+            return movieListRepository.findById(listId)
+                    .orElseThrow(() -> new NotFoundException("Movie list not found after removing item"));
 
         } else if (personList != null) {
             final PersonInList personInList = getPersonInList(personList, itemId);
 
-            // Remove the item from the list
-            personList.getPeople().remove(personInList);
+            // Delete the item directly, no need to manipulate the collection
             personInListRepository.delete(personInList);
 
-            return personListRepository.save(personList);
+            // Re-fetch the list to get the updated collection
+            return personListRepository.findById(listId)
+                    .orElseThrow(() -> new NotFoundException("Person list not found after removing item"));
         }
 
 
@@ -202,7 +209,7 @@ public class ListItemService {
 
     // ----- Helper methods -----
 
-    private MovieInList createMovieInList(final AddItemToListRequest request,
+    private MovieInList createMovieInList(final AddMovieToListRequest request,
                                           final MovieList movieList
     ) {
         final Integer itemId = request.getItemId();
@@ -218,6 +225,7 @@ public class ListItemService {
                     .addedAt(LocalDateTime.now())
                     .notes(request.getNotes())
                     .watchedAt(request.getWatchedAt())
+                    .watchedLanguage(request.getWatchedLanguage())
                     .build();
         }
 
@@ -297,7 +305,7 @@ public class ListItemService {
                 productionCountries,
                 spokenLanguages,
                 credits);
-        movieRepository.save(movie);
+        movieRepository.saveAndFlush(movie);
 
         // 4. Create MovieInList entry with request params
         return MovieInList.builder()
@@ -306,10 +314,11 @@ public class ListItemService {
                 .addedAt(LocalDateTime.now())
                 .notes(request.getNotes())
                 .watchedAt(request.getWatchedAt())
+                .watchedLanguage(request.getWatchedLanguage())
                 .build();
     }
 
-    private PersonInList createPersonInList(final AddItemToListRequest request,
+    private PersonInList createPersonInList(final AddPersonToListRequest request,
                                             final PersonList personList
     ) {
         final Integer itemId = request.getItemId();
@@ -375,7 +384,7 @@ public class ListItemService {
 
         // Person
         final Person person = tmdbMapper.mapTMDBPersonToPerson(personDb, movieCredits, tvCredits);
-        personRepository.save(person);
+        personRepository.saveAndFlush(person);
 
         // 4. Create PersonInList entry with request params
         return PersonInList.builder()

@@ -146,7 +146,7 @@ public class ListItemService {
     }
 
     @Transactional
-    public List addItemToList(final UUID listId, final AddItemToListRequest request, final UUID userId) {
+    public ItemInList addItemToList(final UUID listId, final AddItemToListRequest request, final UUID userId) {
         if (request instanceof AddMovieToListRequest movieRequest) {
             final MovieList movieList = movieListRepository.findById(listId)
                     .orElseThrow(() -> new NotFoundException("Movie list not found"));
@@ -155,12 +155,8 @@ public class ListItemService {
 
             final MovieInList movieInList = createMovieInList(movieRequest, movieList);
 
-            // Save the item separately to avoid hashCode() triggering lazy-loading during collection add
-            movieInListRepository.save(movieInList);
+            return movieInListRepository.save(movieInList);
 
-            // Re-fetch the list to get the fresh collection
-            return movieListRepository.findById(listId)
-                    .orElseThrow(() -> new NotFoundException("Movie list not found after adding item"));
         } else if (request instanceof AddPersonToListRequest personRequest) {
             final PersonList personList = personListRepository.findById(listId)
                     .orElseThrow(() -> new NotFoundException("Person list not found"));
@@ -169,12 +165,7 @@ public class ListItemService {
 
             final PersonInList personInList = createPersonInList(personRequest, personList);
 
-            // Save the item separately to avoid hashCode() triggering lazy-loading during collection add
-            personInListRepository.save(personInList);
-
-            // Re-fetch the list to get the fresh collection
-            return personListRepository.findById(listId)
-                    .orElseThrow(() -> new NotFoundException("Person list not found after adding item"));
+            return personInListRepository.save(personInList);
         }
 
 
@@ -182,10 +173,10 @@ public class ListItemService {
     }
 
     @Transactional
-    public List editItemInList(final UUID listId,
-                               final UUID itemId,
-                               final EditItemInListRequest request,
-                               final UUID userId) {
+    public ItemInList editItemInList(final UUID listId,
+                                     final UUID itemId,
+                                     final EditItemInListRequest request,
+                                     final UUID userId) {
 
         final MovieList movieList = getMovieList(listId, userId);
         final PersonList personList = getPersonList(listId, userId);
@@ -444,10 +435,10 @@ public class ListItemService {
         return personList;
     }
 
-    private MovieList editMovieInList(final MovieList movieList,
-                                      final UUID itemId,
-                                      final EditItemInListRequest request,
-                                      final UUID listId) {
+    private MovieInList editMovieInList(final MovieList movieList,
+                                        final UUID itemId,
+                                        final EditItemInListRequest request,
+                                        final UUID listId) {
         // Verify item exists in list
         if (movieList.getMovies().stream().noneMatch(
                 movieInList -> movieInList.getId().equals(itemId)
@@ -469,17 +460,13 @@ public class ListItemService {
         }
 
         // Save and return
-        movieInListRepository.save(movieInList);
-
-        // Fetch the updated list to ensure it contains the newly updated item
-        return movieListRepository.findById(listId)
-                .orElseThrow(() -> new NotFoundException("List not found after update"));
+        return movieInListRepository.save(movieInList);
     }
 
-    private PersonList editPersonInList(final PersonList personList,
-                                        final UUID itemId,
-                                        final EditItemInListRequest request,
-                                        final UUID listId) {
+    private PersonInList editPersonInList(final PersonList personList,
+                                          final UUID itemId,
+                                          final EditItemInListRequest request,
+                                          final UUID listId) {
         // Verify item exists in list
         if (personList.getPeople().stream().noneMatch(
                 personInList -> personInList.getId().equals(itemId)
@@ -497,11 +484,7 @@ public class ListItemService {
         }
 
         // Save and return
-        personInListRepository.save(personInList);
-
-        // Fetch the updated list to ensure it contains the newly updated item
-        return personListRepository.findById(listId)
-                .orElseThrow(() -> new NotFoundException("List not found after update"));
+        return personInListRepository.save(personInList);
     }
 
     private MovieInList getMovieInList(final MovieList movieList, final UUID itemId) {

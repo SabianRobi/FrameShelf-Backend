@@ -5,7 +5,6 @@ import com.sabianrobi.frameshelf.entity.request.AddItemToListRequest;
 import com.sabianrobi.frameshelf.entity.request.EditItemInListRequest;
 import com.sabianrobi.frameshelf.entity.request.params.GetListItemsParams;
 import com.sabianrobi.frameshelf.entity.response.ItemInListResponse;
-import com.sabianrobi.frameshelf.entity.response.ListResponse;
 import com.sabianrobi.frameshelf.mapper.ItemInListMapper;
 import com.sabianrobi.frameshelf.mapper.ListMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
@@ -90,7 +89,7 @@ public class ListItemController {
     }
 
     @PostMapping("/{userId}/lists/{listId}/items")
-    public ResponseEntity<ListResponse> addItemToList(
+    public ResponseEntity<ItemInListResponse> addItemToList(
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
             @RequestBody final AddItemToListRequest request,
@@ -99,13 +98,13 @@ public class ListItemController {
 
         final User user = customOAuth2User.getUser();
 
-        final List updatedList = listItemService.addItemToList(listId, request, user.getId());
+        final ItemInList itemInList = listItemService.addItemToList(listId, request, user.getId());
 
-        return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
+        return ResponseEntity.ok(itemInListMapper.mapItemInListToItemInListResponse(itemInList));
     }
 
     @PatchMapping("/{userId}/lists/{listId}/items/{itemId}")
-    public ResponseEntity<ListResponse> editItemInList(
+    public ResponseEntity<ItemInListResponse> editItemInList(
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
             @PathVariable("itemId") final UUID itemId,
@@ -115,12 +114,13 @@ public class ListItemController {
 
         final User user = customOAuth2User.getUser();
 
-        final List updatedList = listItemService.editItemInList(listId, itemId, request, user.getId());
-        return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
+        final ItemInList itemInList = listItemService.editItemInList(listId, itemId, request, user.getId());
+
+        return ResponseEntity.ok(itemInListMapper.mapItemInListToItemInListResponse(itemInList));
     }
 
     @DeleteMapping("/{userId}/lists/{listId}/items/{itemId}")
-    public ResponseEntity<ListResponse> removeItemFromList(
+    public ResponseEntity removeItemFromList(
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
             @PathVariable("itemId") final UUID itemId,
@@ -129,7 +129,7 @@ public class ListItemController {
 
         final User user = customOAuth2User.getUser();
 
-        final List updatedList = listItemService.removeItemFromList(listId, itemId, user.getId());
-        return ResponseEntity.ok(listMapper.mapListToListResponse(updatedList));
+        listItemService.removeItemFromList(listId, itemId, user.getId());
+        return ResponseEntity.noContent().build();
     }
 }

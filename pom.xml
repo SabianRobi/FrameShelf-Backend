@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.sabianrobi</groupId>
     <artifactId>frameshelf</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <name>FrameShelf</name>
     <description>Track watched movies and save people you like to see in films.</description>
     <url/>

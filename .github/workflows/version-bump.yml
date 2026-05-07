@@ -6,6 +6,10 @@ on:
       - main
       - versioning
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   bump-version:
     runs-on: ubuntu-latest

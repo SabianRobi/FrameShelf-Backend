@@ -1,0 +1,93 @@
+name: Bump Version
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    if: |
+      !contains(github.event.head_commit.message, 'chore(release)')
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Git Config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine Version Bump
+        id: version
+        run: |
+          # Get last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          LAST_VERSION=${LAST_TAG#v}
+          
+          # Get commit messages since last tag
+          COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s" -1)
+          
+          # Determine version bump
+          IFS=$'\n'
+          MAJOR=0
+          MINOR=0
+          PATCH=1
+          
+          for commit in $COMMITS; do
+            if [[ $commit =~ ^feat(\(.+\))?!: ]]; then
+              MAJOR=1
+            elif [[ $commit =~ ^feat(\(.+\))?: ]] && [ $MAJOR -eq 0 ]; then
+              MINOR=1
+            elif [[ $commit =~ ^fix(\(.+\))?: ]] && [ $MAJOR -eq 0 ] && [ $MINOR -eq 0 ]; then
+              PATCH=1
+            fi
+          done
+          
+          # Parse current version
+          MAJOR_V=$(echo $LAST_VERSION | cut -d. -f1)
+          MINOR_V=$(echo $LAST_VERSION | cut -d. -f2)
+          PATCH_V=$(echo $LAST_VERSION | cut -d. -f3)
+          
+          # Calculate new version
+          if [ $MAJOR -eq 1 ]; then
+            MAJOR_V=$((MAJOR_V + 1))
+            MINOR_V=0
+            PATCH_V=0
+          elif [ $MINOR -eq 1 ]; then
+            MINOR_V=$((MINOR_V + 1))
+            PATCH_V=0
+          else
+            PATCH_V=$((PATCH_V + 1))
+          fi
+          
+          NEW_VERSION="${MAJOR_V}.${MINOR_V}.${PATCH_V}"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $LAST_VERSION -> $NEW_VERSION"
+
+      - name: Update pom.xml
+        run: |
+          # Find the version line after frameshelf artifactId and replace it
+          sed -i '/<artifactId>frameshelf<\/artifactId>/,/<\/artifactId>/{s/<version>[^<]*<\/version>/<version>${{ steps.version.outputs.new_version }}<\/version>/;}' pom.xml
+
+      - name: Commit and Tag
+        run: |
+          git add pom.xml
+          git commit -m "chore(release): v${{ steps.version.outputs.new_version }}"
+          git tag -a "v${{ steps.version.outputs.new_version }}" -m "Release v${{ steps.version.outputs.new_version }}"
+
+      - name: Push Changes
+        run: |
+          git push origin HEAD:${{ github.ref_name }}
+          git push origin "v${{ steps.version.outputs.new_version }}"
+
+
+

@@ -19,7 +19,7 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: sabianrobi
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract version from pom.xml
@@ -34,5 +34,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/frameshelf-backend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/frameshelf-backend:v${{ steps.get_version.outputs.version }}
+            sabianrobi/frameshelf-backend:latest
+            sabianrobi/frameshelf-backend:${{ steps.get_version.outputs.version }}

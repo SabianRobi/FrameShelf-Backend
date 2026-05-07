@@ -14,7 +14,7 @@ jobs:
       !contains(github.event.head_commit.message, 'chore(release)')
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.0
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -73,21 +73,8 @@ jobs:
 
       - name: Update pom.xml
         run: |
-          # Replace version in <artifactId>frameshelf</artifactId> block
-          python3 << 'EOF'
-          import re
-          with open('pom.xml', 'r') as f:
-              content = f.read()
-          # Find the project version line and replace it
-          content = re.sub(
-              r'(<artifactId>frameshelf</artifactId>\s*<version>)[^<]+(<\/version>)',
-              r'\1${{ steps.version.outputs.new_version }}\2',
-              content
-          )
-          with open('pom.xml', 'w') as f:
-              f.write(content)
-          print("Updated pom.xml to version ${{ steps.version.outputs.new_version }}")
-          EOF
+          # Find the version line after frameshelf artifactId and replace it
+          sed -i '/<artifactId>frameshelf<\/artifactId>/,/<\/artifactId>/{s/<version>[^<]*<\/version>/<version>${{ steps.version.outputs.new_version }}<\/version>/;}' pom.xml
 
       - name: Commit and Tag
         run: |

@@ -84,7 +84,7 @@ jobs:
 
       - name: Push Changes
         run: |
-          git push origin main
+          git push origin HEAD:${{ github.ref_name }}
           git push origin "v${{ steps.version.outputs.new_version }}"
 
 

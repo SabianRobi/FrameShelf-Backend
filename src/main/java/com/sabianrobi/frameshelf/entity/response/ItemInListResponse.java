@@ -16,4 +16,6 @@ public abstract class ItemInListResponse {
     private UUID id;
     private LocalDateTime addedAt;
     private String notes;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

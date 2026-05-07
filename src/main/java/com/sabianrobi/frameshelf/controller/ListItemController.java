@@ -8,7 +8,6 @@ import com.sabianrobi.frameshelf.entity.response.ItemInListResponse;
 import com.sabianrobi.frameshelf.mapper.ItemInListMapper;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
 import com.sabianrobi.frameshelf.service.ListItemService;
-import com.sabianrobi.frameshelf.utility.Helper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.sabianrobi.frameshelf.utility.Helper.getSafePageable;
 import static com.sabianrobi.frameshelf.utility.Helper.verifyUserHasAccessToList;
 
 @RestController
@@ -34,7 +34,7 @@ public class ListItemController {
     private ItemInListMapper itemInListMapper;
 
     @GetMapping("/{userId}/lists/{listId}/items")
-    public Page getItemsInList(
+    public Page<?> getItemsInList(
             @PathVariable("userId") final UUID userId,
             @PathVariable("listId") final UUID listId,
             @ModelAttribute final GetListItemsParams params,
@@ -44,8 +44,8 @@ public class ListItemController {
 
         if (params.getType() == ListType.MOVIE) {
             // Sorting & Pagination
-            final Set<String> allowedKeys = Set.of("notes", "addedAt", "watchedAt", "createdAt", "updatedAt");
-            final Pageable safePageable = Helper.getSafePageable(pageable, allowedKeys);
+            final Set<String> allowedKeys = Set.of("notes", "addedAt", "watchedAt", "watchedLanguage", "createdAt", "updatedAt");
+            final Pageable safePageable = getSafePageable(pageable, allowedKeys);
 
             // Getting the data
             final Page<MovieInList> movies = listItemService.getMovieListItems(userId, listId, safePageable);
@@ -55,7 +55,7 @@ public class ListItemController {
         } else if (params.getType() == ListType.PERSON) {
             // Sorting & Pagination
             final Set<String> allowedKeys = Set.of("notes", "addedAt", "createdAt", "updatedAt");
-            final Pageable safePageable = Helper.getSafePageable(pageable, allowedKeys);
+            final Pageable safePageable = getSafePageable(pageable, allowedKeys);
 
             // Getting the data
             final Page<PersonInList> lists = listItemService.getPersonListItems(userId, listId, safePageable);

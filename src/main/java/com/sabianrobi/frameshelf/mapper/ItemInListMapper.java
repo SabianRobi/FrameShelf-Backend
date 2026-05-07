@@ -27,6 +27,8 @@ public class ItemInListMapper {
                 .notes(movieInList.getNotes())
                 .watchedAt(movieInList.getWatchedAt())
                 .watchedLanguage(movieInList.getWatchedLanguage())
+                .createdAt(movieInList.getCreatedAt())
+                .updatedAt(movieInList.getUpdatedAt())
                 .build();
     }
 
@@ -36,6 +38,8 @@ public class ItemInListMapper {
                 .person(mapPersonToPersonResponse(personInList.getPerson()))
                 .addedAt(personInList.getAddedAt())
                 .notes(personInList.getNotes())
+                .createdAt(personInList.getCreatedAt())
+                .updatedAt(personInList.getUpdatedAt())
                 .build();
     }
 

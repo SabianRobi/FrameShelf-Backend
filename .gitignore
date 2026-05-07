@@ -32,4 +32,4 @@ build/
 .vscode/
 
 ### Other ###
-/src/main/resources/application.properties
+.env

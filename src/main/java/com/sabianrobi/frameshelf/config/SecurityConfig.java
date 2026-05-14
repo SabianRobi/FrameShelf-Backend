@@ -1,7 +1,6 @@
 package com.sabianrobi.frameshelf.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.sabianrobi.frameshelf.entity.response.GetLoginUrlResponse;
 import com.sabianrobi.frameshelf.entity.response.UserResponse;
 import com.sabianrobi.frameshelf.security.CustomOAuth2User;
@@ -68,7 +67,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(final HttpSecurity http) {
         http
                 .cors(Customizer.withDefaults())
                 .headers(Customizer.withDefaults())
@@ -111,9 +110,7 @@ public class SecurityConfig {
                     final GetLoginUrlResponse getLoginUrlResponse = GetLoginUrlResponse.builder()
                             .url(url)
                             .build();
-                    final ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-                    final String json = ow.writeValueAsString(getLoginUrlResponse);
-                    response.getWriter().write(json);
+                    objectMapper.writeValue(response.getOutputStream(), getLoginUrlResponse);
                 });
                 authEndpoint.authorizationRequestRepository(authorizationRequestRepository());
             });
@@ -141,7 +138,7 @@ public class SecurityConfig {
                 // Set JWT token as HTTP-only cookie
                 final Cookie jwtCookie = new Cookie("AUTH_TOKEN", jwtToken);
                 jwtCookie.setHttpOnly(true);
-                jwtCookie.setSecure(false); // TODO Set to true in production with HTTPS
+                jwtCookie.setSecure(true);
                 jwtCookie.setPath("/");
                 jwtCookie.setMaxAge((int) (jwtService.getExpirationTime() / 1000)); // Convert to seconds
                 jwtCookie.setAttribute("SameSite", "Lax");
@@ -153,9 +150,7 @@ public class SecurityConfig {
 
                 // Convert to UserResponse and return
                 final UserResponse userResponse = UserResponse.fromUser(user);
-                final ObjectWriter writer = objectMapper.writer().withDefaultPrettyPrinter();
-                final String json = writer.writeValueAsString(userResponse);
-                response.getWriter().write(json);
+                objectMapper.writeValue(response.getOutputStream(), userResponse);
             });
 
             // Configure the failure handler

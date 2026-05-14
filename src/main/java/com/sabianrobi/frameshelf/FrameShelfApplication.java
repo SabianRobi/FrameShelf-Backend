@@ -2,11 +2,15 @@ package com.sabianrobi.frameshelf;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+
+import static org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO;
 
 @SpringBootApplication
+@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 public class FrameShelfApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(FrameShelfApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(FrameShelfApplication.class, args);
+    }
 }

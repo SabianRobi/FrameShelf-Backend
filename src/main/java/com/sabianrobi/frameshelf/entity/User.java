@@ -25,7 +25,7 @@ public class User extends BaseEntity {
     private String profilePicture;
     private LocalDateTime lastLoginAt;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private GoogleUser googleUser;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

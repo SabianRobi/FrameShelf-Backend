@@ -60,4 +60,10 @@ public abstract class Helper {
             throw new NotAuthorizedException("User is not authorized to access this list");
         }
     }
+
+    public static void verifyUserHasAccessToUser(final UUID userId, final User user) {
+        if (!user.getId().equals(userId)) {
+            throw new NotAuthorizedException("User is not authorized to access this user");
+        }
+    }
 }

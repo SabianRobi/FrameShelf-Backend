@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.sabianrobi.frameshelf.utility.Helper.verifyUserHasAccessToUser;
+
 @Service
 public class UserService {
     @Autowired
@@ -51,5 +53,11 @@ public class UserService {
 
             return userRepository.save(newUser);
         }
+    }
+
+    public void deleteUser(final UUID userId, final User user) {
+        verifyUserHasAccessToUser(userId, user);
+
+        userRepository.deleteById(userId);
     }
 }

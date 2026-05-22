@@ -50,7 +50,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/login/oauth2/callback/**",
                                 "/api/v1/auth/logout",
                                 "/api/v1/user/me",
-                                "/error"
+                                "/error",
+                                "/api/v1/actuator/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

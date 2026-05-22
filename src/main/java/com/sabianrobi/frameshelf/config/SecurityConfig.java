@@ -85,8 +85,8 @@ public class SecurityConfig {
                 .logoutUrl("/api/v1/auth/logout")
                 .logoutSuccessHandler(
                         (request, response, authentication) ->
-                                response.sendRedirect(frontendUrl + "?logout=success"))
-        );
+                                response.setStatus(HttpStatus.OK.value())
+                ));
         http.csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
